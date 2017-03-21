@@ -9,6 +9,10 @@
 import UIKit
 import CocoaAsyncSocket
 
+enum STUNErrors: Error {
+    case CantConvertValue
+}
+
 let RandomLocalPort: UInt16 = 0
 let STUNRequestTimeout: TimeInterval = 3.0
 
@@ -65,6 +69,40 @@ enum AttributeType: Int {
     case RESPONSE_ORIGIN =	0x802B
     case OTHER_ADDRESS =	0x802C
     case UNKNOWN = 0
+    
+    func description(from data: Data) throws -> String {
+        switch self {
+        case .MAPPED_ADDRESS:
+            guard let packet: NORMAL_ADDRESS_ATTRIBUTE_PACKET = convertTo(of: data) else {
+                throw STUNErrors.CantConvertValue
+            }
+            return packet.description
+        default:
+            return "UNKNOWN"
+        }
+    }
+    
+    func convertTo<T>(of data: Data) -> T? {
+        guard MemoryLayout<T>.size == data.count else {
+            return nil
+        }
+       return data.withUnsafeBytes { $0.pointee }
+    }
+}
+
+struct NORMAL_ADDRESS_ATTRIBUTE_PACKET {
+    let unused: UInt8
+    let family: UInt8
+    let port: UInt16
+    let addr1: UInt8
+    let addr2: UInt8
+    let addr3: UInt8
+    let addr4: UInt8
+    
+    var description: String {
+        return "family: \(self.family), port: \(self.port), address: \(self.addr1).\(self.addr2).\(self.addr3).\(self.addr4)"
+
+    }
 }
 
 public protocol STUNClientDelegate: class {
@@ -108,36 +146,6 @@ struct STUNAttribute {
         return AttributeType(rawValue: Int(self.attributeType[0]) * 256 + Int(self.attributeType[1])) ?? .UNKNOWN
     }
     
-    func getIPAddress() -> String {
-        switch getAttributeType() {
-        case .MAPPED_ADDRESS:
-            return "\(attributeBody[4]).\(attributeBody[5]).\(attributeBody[6]).\(attributeBody[7])"
-        case .RESPONSE_ADDRESS:
-            return "\(attributeBody[4]).\(attributeBody[5]).\(attributeBody[6]).\(attributeBody[7])"
-        case .RESPONSE_ORIGIN:
-            return "\(attributeBody[4]).\(attributeBody[5]).\(attributeBody[6]).\(attributeBody[7])"
-        case .OTHER_ADDRESS:
-            return "\(attributeBody[4]).\(attributeBody[5]).\(attributeBody[6]).\(attributeBody[7])"
-        default:
-            return ""
-        }
-    }
-    
-    func getPort() -> Int {
-        switch getAttributeType() {
-        case .MAPPED_ADDRESS:
-            return Int(attributeBody[2]) * 256 + Int(attributeBody[3])
-        case .RESPONSE_ADDRESS:
-            return Int(attributeBody[2]) * 256 + Int(attributeBody[3])
-        case .RESPONSE_ORIGIN:
-            return Int(attributeBody[2]) * 256 + Int(attributeBody[3])
-        case .OTHER_ADDRESS:
-            return Int(attributeBody[2]) * 256 + Int(attributeBody[3])
-        default:
-            return 0
-        }
-    }
-
     func description() -> String {
         switch getAttributeType() {
         case .SOFTWARE:
@@ -299,6 +307,9 @@ extension STUNClient: GCDAsyncUdpSocketDelegate {
             attributes.append(attribute)
             if body.count < 4 {
                 break
+            }
+            if attribute.getAttributeType() == .MAPPED_ADDRESS {
+                try? delegate?.verbose("Attribute:  \(attribute.getAttributeType().description(from: Data(attribute.attributeBody))) \n")
             }
         }
         
