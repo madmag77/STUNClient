@@ -25,7 +25,17 @@ class ViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         stunLog.text = "-----==FIRST TIME==-----\n"
-        stunClient.getNATParams(stunServer: "149.126.21.242", localPort: 14135, stunPort: 3478)
+        do {
+            //try self.stunClient.getNATParams(stunAddress: "5.45.123.244", localPort: 53000, stunPort: 3478)
+            try self.stunClient.getNATParams(stunAddress: "77.72.169.210", localPort: 53000, stunPort: 3478)
+        } catch STUNError.CantBindToLocalPort(let port) {
+            self.error(errorText: "Cant Bind To Local Port \(port)")
+        } catch STUNError.CantRunUdpSocket {
+            self.error(errorText: "Cant Run UDP Socket")
+        } catch {
+            self.error(errorText: "Unexpeted error \(error)")
+        }
+       
     }
 }
 
@@ -53,7 +63,15 @@ extension ViewController: STUNClientDelegate {
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(500), execute: {
            // self.stunLog.text = "COMPLETED: " + "\n" + nat.description + "\n"
             self.stunLog.text = self.stunLog.text + "\n" + "-----==SECOND TIME==-----\n"
-            self.stunClient.getNATParams(stunServer: "149.126.21.242", localPort: 14135, stunPort: 3478)
+            do {
+                try self.stunClient.getNATParams(stunAddress: "149.126.21.242", localPort: 53000, stunPort: 3478)
+            } catch STUNError.CantBindToLocalPort(let port) {
+                self.error(errorText: "Cant Bind To Local Port \(port)")
+            } catch STUNError.CantRunUdpSocket {
+                self.error(errorText: "Cant Run UDP Socket")
+            } catch {
+                self.error(errorText: "Unexpeted error \(error)")
+            }
         })
     }
 }
