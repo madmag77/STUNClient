@@ -25,7 +25,7 @@ class ViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         stunLog.text = "-----==FIRST TIME==-----\n"
-        stunClient.getNATParams(stunServer: "149.126.21.242", localPort: 14135, stunPort: 3478)
+        stunClient.getNATParams(stunServer: "74.125.200.127", localPort: 14135, stunPort: 19302)
     }
 }
 
@@ -53,7 +53,7 @@ extension ViewController: STUNClientDelegate {
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(500), execute: {
            // self.stunLog.text = "COMPLETED: " + "\n" + nat.description + "\n"
             self.stunLog.text = self.stunLog.text + "\n" + "-----==SECOND TIME==-----\n"
-            self.stunClient.getNATParams(stunServer: "149.126.21.242", localPort: 14135, stunPort: 3478)
+            self.stunClient.getNATParams(stunServer: "74.125.200.127", localPort: 14135, stunPort: 19302)
         })
     }
 }
