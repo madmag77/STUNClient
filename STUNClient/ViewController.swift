@@ -26,8 +26,7 @@ class ViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         stunLog.text = "-----==FIRST TIME==-----\n"
         do {
-            //try self.stunClient.getNATParams(stunAddress: "5.45.123.244", localPort: 53000, stunPort: 3478)
-            try self.stunClient.getNATParams(stunAddress: "77.72.169.210", localPort: 53000, stunPort: 3478)
+            try self.stunClient.getNATParams(stunAddress: "74.125.200.127", localPort: 53000, stunPort: 19302)
         } catch STUNError.CantBindToLocalPort(let port) {
             self.error(errorText: "Cant Bind To Local Port \(port)")
         } catch STUNError.CantRunUdpSocket {
