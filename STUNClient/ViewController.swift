@@ -63,7 +63,7 @@ extension ViewController: STUNClientDelegate {
            // self.stunLog.text = "COMPLETED: " + "\n" + nat.description + "\n"
             self.stunLog.text = self.stunLog.text + "\n" + "-----==SECOND TIME==-----\n"
             do {
-                try self.stunClient.getNATParams(stunAddress: "149.126.21.242", localPort: 53000, stunPort: 3478)
+                try self.stunClient.getNATParams(stunAddress: "74.125.200.127", localPort: 53000, stunPort: 19302)
             } catch STUNError.CantBindToLocalPort(let port) {
                 self.error(errorText: "Cant Bind To Local Port \(port)")
             } catch STUNError.CantRunUdpSocket {
