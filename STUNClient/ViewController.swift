@@ -34,7 +34,7 @@ class ViewController: UIViewController {
         } catch {
             self.error(errorText: "Unexpeted error \(error)")
         }
-       
+
     }
 }
 
