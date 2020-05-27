@@ -8,6 +8,7 @@
 
 import UIKit
 import CocoaAsyncSocket
+import NIO
 
 public protocol STUNClientDelegate: class {
     func verbose(_ logText: String)

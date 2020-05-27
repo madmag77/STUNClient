@@ -3,12 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		33373B5B303A453C9D56D97D /* Pods_STUNClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2371611BFBDD6586F37481B6 /* Pods_STUNClient.framework */; };
 		E75517FEFF22E8E2E08323E7 /* Pods_STUNClientTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3F24A7ABDC1FD48DEAE1699 /* Pods_STUNClientTests.framework */; };
+		EB27FD4B247E3875003C3C41 /* NIOTestUtils in Frameworks */ = {isa = PBXBuildFile; productRef = EB27FD4A247E3875003C3C41 /* NIOTestUtils */; };
+		EB27FD4D247E3875003C3C41 /* NIO in Frameworks */ = {isa = PBXBuildFile; productRef = EB27FD4C247E3875003C3C41 /* NIO */; };
 		EB47F4EF1E9A35E00015B45F /* STUNAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB47F4EE1E9A35E00015B45F /* STUNAttributes.swift */; };
 		EB72F9A01E7E7943000FF742 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB72F99F1E7E7943000FF742 /* AppDelegate.swift */; };
 		EB72F9A21E7E7943000FF742 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB72F9A11E7E7943000FF742 /* ViewController.swift */; };
@@ -66,7 +68,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB27FD4D247E3875003C3C41 /* NIO in Frameworks */,
 				33373B5B303A453C9D56D97D /* Pods_STUNClient.framework in Frameworks */,
+				EB27FD4B247E3875003C3C41 /* NIOTestUtils in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -197,6 +201,10 @@
 			dependencies = (
 			);
 			name = STUNClient;
+			packageProductDependencies = (
+				EB27FD4A247E3875003C3C41 /* NIOTestUtils */,
+				EB27FD4C247E3875003C3C41 /* NIO */,
+			);
 			productName = STUNClient;
 			productReference = EB72F99C1E7E7943000FF742 /* STUNClient.app */;
 			productType = "com.apple.product-type.application";
@@ -277,6 +285,9 @@
 				Base,
 			);
 			mainGroup = EB72F9931E7E7943000FF742;
+			packageReferences = (
+				EB27FD49247E3875003C3C41 /* XCRemoteSwiftPackageReference "swift-nio" */,
+			);
 			productRefGroup = EB72F99D1E7E7943000FF742 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -525,7 +536,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -539,7 +551,10 @@
 				DEVELOPMENT_TEAM = STZB53GU8R;
 				INFOPLIST_FILE = STUNClient/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.MadMag.STUNClient;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -555,7 +570,10 @@
 				DEVELOPMENT_TEAM = STZB53GU8R;
 				INFOPLIST_FILE = STUNClient/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.MadMag.STUNClient;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -570,7 +588,11 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = STZB53GU8R;
 				INFOPLIST_FILE = STUNClientTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.-MadMag.STUNClientTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -586,7 +608,11 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = STZB53GU8R;
 				INFOPLIST_FILE = STUNClientTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.-MadMag.STUNClientTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -600,7 +626,11 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				DEVELOPMENT_TEAM = STZB53GU8R;
 				INFOPLIST_FILE = STUNClientUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.-MadMag.STUNClientUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -614,7 +644,11 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				DEVELOPMENT_TEAM = STZB53GU8R;
 				INFOPLIST_FILE = STUNClientUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.-MadMag.STUNClientUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -662,6 +696,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EB27FD49247E3875003C3C41 /* XCRemoteSwiftPackageReference "swift-nio" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-nio.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.17.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EB27FD4A247E3875003C3C41 /* NIOTestUtils */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EB27FD49247E3875003C3C41 /* XCRemoteSwiftPackageReference "swift-nio" */;
+			productName = NIOTestUtils;
+		};
+		EB27FD4C247E3875003C3C41 /* NIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EB27FD49247E3875003C3C41 /* XCRemoteSwiftPackageReference "swift-nio" */;
+			productName = NIO;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EB72F9941E7E7943000FF742 /* Project object */;
 }
