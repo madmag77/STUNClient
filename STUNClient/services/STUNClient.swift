@@ -159,7 +159,8 @@ open class STUNClient: NSObject {
         try self.startReceiving()
         
         state = .FirstRequest
-
+        
+        getAttributesFromEmptyBindingRequet({_ in })
     }
 
     func getAttributesFromEmptyBindingRequet(_ callBack:@escaping ([STUNAttribute]) -> ()) {
@@ -182,10 +183,11 @@ open class STUNClient: NSObject {
     }
     
     func startReceiving() throws {
+        guard let updSocket = updSocket else { throw STUNError.CantRunUdpSocket }
         do {
-            try updSocket?.beginReceiving()
+            try updSocket.beginReceiving()
         } catch {
-            updSocket = nil
+            self.updSocket = nil
             throw STUNError.CantRunUdpSocket
         }
     }
@@ -206,7 +208,7 @@ open class STUNClient: NSObject {
     func sendData(_ data: Data) {
         delegate?.verbose("Sending binding packet...")
         
-        updSocket?.send(data, toHost: stunAddress, port: stunPort, withTimeout: STUNRequestTimeout, tag: PacketsTags.BindingRequest.rawValue)
+        updSocket?.send(data, toHost: stunAddress, port: stunPort, withTimeout: 3.0, tag: PacketsTags.BindingRequest.rawValue)
     }
     
     func closeSocket() {
@@ -287,8 +289,8 @@ extension STUNClient: GCDAsyncUdpSocketDelegate {
             return
         }
         
-        let attributes = getAttributes(from: receivedPacket)
-        
+        let _ = getAttributes(from: receivedPacket)
+
         switch self.state {
         case .FirstRequest:
             bindingPacket = prepareBindingRequestChangePort(to: 50000)
