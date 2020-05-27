@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		33373B5B303A453C9D56D97D /* Pods_STUNClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2371611BFBDD6586F37481B6 /* Pods_STUNClient.framework */; };
 		E75517FEFF22E8E2E08323E7 /* Pods_STUNClientTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3F24A7ABDC1FD48DEAE1699 /* Pods_STUNClientTests.framework */; };
+		EB47F4EF1E9A35E00015B45F /* STUNAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB47F4EE1E9A35E00015B45F /* STUNAttributes.swift */; };
 		EB72F9A01E7E7943000FF742 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB72F99F1E7E7943000FF742 /* AppDelegate.swift */; };
 		EB72F9A21E7E7943000FF742 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB72F9A11E7E7943000FF742 /* ViewController.swift */; };
 		EB72F9A51E7E7943000FF742 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EB72F9A31E7E7943000FF742 /* Main.storyboard */; };
@@ -43,6 +44,7 @@
 		64F33D0F540259EC66E0532D /* Pods-STUNClient.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STUNClient.debug.xcconfig"; path = "Pods/Target Support Files/Pods-STUNClient/Pods-STUNClient.debug.xcconfig"; sourceTree = "<group>"; };
 		A3F24A7ABDC1FD48DEAE1699 /* Pods_STUNClientTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STUNClientTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF41830BC2767DC7C571890D /* Pods-STUNClientTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STUNClientTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-STUNClientTests/Pods-STUNClientTests.debug.xcconfig"; sourceTree = "<group>"; };
+		EB47F4EE1E9A35E00015B45F /* STUNAttributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STUNAttributes.swift; sourceTree = "<group>"; };
 		EB72F99C1E7E7943000FF742 /* STUNClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = STUNClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB72F99F1E7E7943000FF742 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EB72F9A11E7E7943000FF742 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 		EB72F9CD1E7E7B54000FF742 /* services */ = {
 			isa = PBXGroup;
 			children = (
+				EB47F4EE1E9A35E00015B45F /* STUNAttributes.swift */,
 				EB72F9D21E7E7D09000FF742 /* STUNClient.swift */,
 			);
 			path = services;
@@ -378,6 +381,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB47F4EF1E9A35E00015B45F /* STUNAttributes.swift in Sources */,
 				EB72F9D31E7E7D09000FF742 /* STUNClient.swift in Sources */,
 				EB72F9A21E7E7943000FF742 /* ViewController.swift in Sources */,
 				EB72F9A01E7E7943000FF742 /* AppDelegate.swift in Sources */,

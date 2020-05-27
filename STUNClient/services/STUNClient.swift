@@ -9,64 +9,6 @@
 import UIKit
 import CocoaAsyncSocket
 
-let RandomLocalPort: UInt16 = 0
-let STUNRequestTimeout: TimeInterval = 3.0
-
-enum PacketsTags: Int {
-    case BindingRequest = 1
-}
-
-enum AddressType {
-    case MappedAddress
-    case XorMappedAddress
-}
-
-enum ResponseType {
-    case BindingResponse
-    case BindingErrorResponse
-}
-
-enum AttributeType: Int {
-    case MAPPED_ADDRESS = 0x0001
-    case RESPONSE_ADDRESS =  0x0002
-    case CHANGE_REQUEST = 0x0003
-    case SOURCE_ADDRESS = 0x0004
-    case CHANGED_ADDRESS = 0x0005
-    case USERNAME = 0x0006
-    case PASSWORD = 0x0007
-    case MESSAGE_INTEGRITY = 0x0008
-    case ERROR_CODE = 0x0009
-    case UNKNOWN_ATTRIBUTES = 0x000a
-    case REFLECTED_FROM = 0x000b
-    case CHANNEL_NUMBER =	0x000C
-    case LIFETIME =	0x000D
-    case BANDWIDTH = 	0x0010
-    case XOR_PEER_ADDRESS =	0x0012
-    case DATA =	0x0013
-    case REALM =	0x0014
-    case NONCE =	0x0015
-    case XOR_RELAYED_ADDRESS =	0x0016
-    case REQUESTED_ADDRESS_FAMILY =	0x0017
-    case EVEN_PORT =	0x0018
-    case REQUESTED_TRANSPORT =	0x0019
-    case DONT_FRAGMENT =	0x001A
-    case XOR_MAPPED_ADDRESS =	0x0020
-    case TIMER_VAL =	0x0021
-    case RESERVATION_TOKEN =	0x0022
-    case USE_CANDIDATE =	0x0025
-    case PADDING =	0x0026
-    case RESPONSE_PORT =	0x0027
-    case CONNECTION_ID =	0x002A
-    case SOFTWARE =	0x8022
-    case ALTERNATE_SERVER =	0x8023
-    case FINGERPRINT =	0x8028
-    case ICE_CONTROLLED =	0x8029
-    case ICE_CONTROLLING =	0x802A
-    case RESPONSE_ORIGIN =	0x802B
-    case OTHER_ADDRESS =	0x802C
-    case UNKNOWN = 0
-}
-
 public protocol STUNClientDelegate: class {
     func verbose(_ logText: String)
     func error(errorText: String)
@@ -79,7 +21,7 @@ public enum NATType {
     case FullCone
     case Symmetric
     case PortRestricted
-    case Restricted
+    case ConeRestricted
 }
 
 public struct NATParams {
@@ -89,91 +31,37 @@ public struct NATParams {
     public var description: String { return "External IP: \(myExternalIP) \n External Port: \(myExternalPort) \n NAT Type: \(natType) \n" }
 }
 
-struct STUNAttribute {
-    let attributeType: Array<UInt8> //2 bytes
-    let attributeLength: Array<UInt8> //2 bytes
-    let attributeBody: Array<UInt8> //?? bytes
-
-    static func getAttribute(from data: Array<UInt8>) -> STUNAttribute {
-        return STUNAttribute(attributeType: [UInt8](data[0..<2]),
-                             attributeLength:  [UInt8](data[2..<4]),
-                             attributeBody: [UInt8](data[4..<4 + Int(data[2]) * 256 + Int(data[3])]))
-    }
-    
-    func getAttributeLength() -> Int {
-        return attributeType.count + attributeLength.count + attributeBody.count
-    }
-    
-    func getAttributeType() -> AttributeType {
-        return AttributeType(rawValue: Int(self.attributeType[0]) * 256 + Int(self.attributeType[1])) ?? .UNKNOWN
-    }
-    
-    func getIPAddress() -> String {
-        switch getAttributeType() {
-        case .MAPPED_ADDRESS:
-            return "\(attributeBody[4]).\(attributeBody[5]).\(attributeBody[6]).\(attributeBody[7])"
-        case .RESPONSE_ADDRESS:
-            return "\(attributeBody[4]).\(attributeBody[5]).\(attributeBody[6]).\(attributeBody[7])"
-        case .RESPONSE_ORIGIN:
-            return "\(attributeBody[4]).\(attributeBody[5]).\(attributeBody[6]).\(attributeBody[7])"
-        case .OTHER_ADDRESS:
-            return "\(attributeBody[4]).\(attributeBody[5]).\(attributeBody[6]).\(attributeBody[7])"
-        default:
-            return ""
-        }
-    }
-    
-    func getPort() -> Int {
-        switch getAttributeType() {
-        case .MAPPED_ADDRESS:
-            return Int(attributeBody[2]) * 256 + Int(attributeBody[3])
-        case .RESPONSE_ADDRESS:
-            return Int(attributeBody[2]) * 256 + Int(attributeBody[3])
-        case .RESPONSE_ORIGIN:
-            return Int(attributeBody[2]) * 256 + Int(attributeBody[3])
-        case .OTHER_ADDRESS:
-            return Int(attributeBody[2]) * 256 + Int(attributeBody[3])
-        default:
-            return 0
-        }
-    }
-
-    func description() -> String {
-        switch getAttributeType() {
-        case .SOFTWARE:
-            return "Type: \(getAttributeType()) \n content: \(String(bytes: attributeBody, encoding: String.Encoding.utf8) ) \n"
-        default:
-            return "Type: \(getAttributeType()) \n content: \(attributeBody) \n"
-        }
-    }
+public enum STUNError: Error {
+    case CantConvertValue
+    case CantPreparePacket
+    case CantBindToLocalPort(UInt16)
+    case CantRunUdpSocket
 }
 
-struct STUNPacketToSend {
-    let msgRequestType: Array<UInt8> //2 bytes
-    let bodyLength: Array<UInt8> //2 bytes
-    let magicCookie: Array<UInt8> //4 bytes
-    let transactionIdBindingRequest: Array<UInt8> //12 bytes
-    let body: Array<UInt8> //?? bytes
-    
-    static func getBindingPacket() -> STUNPacketToSend  {
-        return STUNPacketToSend(msgRequestType: [0x00, 0x01],
-                                bodyLength:  [0x00, 0x00],
-                                magicCookie: [0x21, 0x12, 0xA4, 0x42],
-                                transactionIdBindingRequest: RandomTransactionID.getTransactionID(),
-                                body: [])
-    }
-    
-    func getPacketData() -> Data {
-        return Data(msgRequestType + bodyLength + magicCookie + transactionIdBindingRequest)
-    }
-    
-    static func getBindingAnswer(from answerPacket: Data) -> STUNPacketToSend {
-        return STUNPacketToSend(msgRequestType: [UInt8](answerPacket[0..<2]),
-                                bodyLength:  [UInt8](answerPacket[2..<4]),
-                                magicCookie: [UInt8](answerPacket[4..<8]),
-                                transactionIdBindingRequest: [UInt8](answerPacket[8..<20]),
-                                body: [UInt8](answerPacket[20..<answerPacket.count]))
-    }
+public enum STUNServerError: UInt16 {
+    case BadRequest = 400
+    case Unauthorized = 401
+    case UnknownAttribute = 420
+    case StaleCredentials = 430
+    case IntegrityCheckFailure = 431
+    case MissingUsername = 432
+    case UseTLS = 433
+    case ServerError = 500
+    case GlobalFailure = 600
+}
+
+fileprivate enum STUNState {
+    case Init
+    case FirstRequest
+    case SecondRequestWithAnotherPort
+}
+
+let RandomLocalPort: UInt16 = 0
+let STUNRequestTimeout: TimeInterval = 3.0
+let MagicCookie: [UInt8] = [0x21, 0x12, 0xA4, 0x42]
+
+enum PacketsTags: Int {
+    case BindingRequest = 1
 }
 
 struct RandomTransactionID {
@@ -186,60 +74,196 @@ struct RandomTransactionID {
     }
 }
 
+enum MessageType: UInt16 {
+    case BindingRequest = 0x0001
+    case BindingResponse = 0x0101
+    case BindingErrorResponse = 0x0111
+    case SharedSecretRequest = 0x0002
+    case SharedSecretResponse = 0x0102
+    case SharedSecretErrorResponse = 0x0112
+}
+
+struct STUNPacket {
+    let msgRequestType: [UInt8] //2 bytes
+    let bodyLength: [UInt8] //2 bytes
+    let magicCookie: [UInt8] //4 bytes
+    let transactionIdBindingRequest: [UInt8] //12 bytes
+    let body: [UInt8] //attributes
+    
+    static func getBindingPacket(responseFromAddress: String = "", port: UInt16 = 0) -> STUNPacket  {
+        
+        let body: [UInt8] = responseFromAddress == "" ? []: getChangeRequestAttribute() + getResponseAddressAttribute(responseFromAddress: responseFromAddress, port: port)
+        
+        return STUNPacket(msgRequestType: [0x00, 0x01],
+                                bodyLength:  [UInt8(body.count / 256), UInt8(body.count % 256)],
+                                magicCookie: MagicCookie,
+                                transactionIdBindingRequest: RandomTransactionID.getTransactionID(),
+                                body: body
+        )
+    }
+    
+    static func getChangeRequestAttribute() ->  [UInt8] {
+        let attributeChangeRequest: [UInt8] = [0x00, 0x00, 0x00, 0x02]
+        return STUNAttribute.formAttribute(type: .CHANGE_REQUEST,
+                                    body: attributeChangeRequest).toArray()
+    }
+    
+    static func getResponseAddressAttribute(responseFromAddress: String, port: UInt16) ->  [UInt8] {
+        return STUNAttribute.formAttribute(type: .RESPONSE_ADDRESS,
+                                           body: NORMAL_ADDRESS_ATTRIBUTE_PACKET.formPacket(with: responseFromAddress, and: port).getPacketData()).toArray()
+    }
+    
+    func getPacketData() -> Data {
+        return Data(msgRequestType + bodyLength + magicCookie + transactionIdBindingRequest + body)
+    }
+    
+    static func getBindingAnswer(from answerPacket: Data) -> STUNPacket? {
+        guard answerPacket.count >= 20 else { return nil }
+        
+        return STUNPacket(msgRequestType: [UInt8](answerPacket[0..<2]),
+                                bodyLength:  [UInt8](answerPacket[2..<4]),
+                                magicCookie: [UInt8](answerPacket[4..<8]),
+                                transactionIdBindingRequest: [UInt8](answerPacket[8..<20]),
+                                body: [UInt8](answerPacket[20..<answerPacket.count]))
+    }
+}
+
 open class STUNClient: NSObject {
     fileprivate weak var delegate: STUNClientDelegate?
-    fileprivate var stunServer: String?
+    fileprivate var stunAddress: String!
+    fileprivate var stunPort: UInt16!
     fileprivate var updSocket: GCDAsyncUdpSocket?
-    fileprivate var asyncQueue: DispatchQueue?
+    fileprivate lazy var asyncQueue: DispatchQueue = {
+        return DispatchQueue(label: "STUNClient")
+    }()
 
-    fileprivate var bindingPacket: STUNPacketToSend?
+    fileprivate var bindingPacket: STUNPacket!
+    fileprivate var state: STUNState = .Init
+    fileprivate var attributesFromEmptyRequestFunc: (([STUNAttribute]) -> ())?
     
     required public init(delegate: STUNClientDelegate?) {
+        super.init()
         self.delegate = delegate
     }
     
-    func getNATParams(stunServer: String, localPort: UInt16 = RandomLocalPort, stunPort: UInt16 = 3478) {
-    
-        delegate?.verbose("Initializing...")
-        self.stunServer = stunServer
+    func getNATParams(stunAddress: String, localPort: UInt16 = RandomLocalPort, stunPort: UInt16 = 3478)  throws {
         
-        if updSocket != nil {
-            updSocket?.close()
-        }
-        asyncQueue = DispatchQueue(label: "STUNClient")
-        updSocket = GCDAsyncUdpSocket(delegate: self, delegateQueue:  asyncQueue)
+        delegate?.verbose("Initializing...")
+        self.stunAddress = stunAddress
+        self.stunPort = stunPort
+        
+        closeSocket()
+        createSocket()
+        
+        try self.bindSocketTo(localPort)
+        try self.startReceiving()
+        
+        state = .FirstRequest
+        
+        getAttributesFromEmptyBindingRequet({_ in })
+    }
+
+    func getAttributesFromEmptyBindingRequet(_ callBack:@escaping ([STUNAttribute]) -> ()) {
+        attributesFromEmptyRequestFunc = callBack
+        bindingPacket = prepareEmptyBindingRequest()
+        sendData(bindingPacket.getPacketData())
+        
+        callBack([])
+    }
+
+    func bindSocketTo(_ localPort: UInt16) throws {
         if localPort != RandomLocalPort {
             do {
                 try updSocket?.bind(toPort: localPort)
             } catch {
-                delegate?.error(errorText: "Can't bind localPort to UDP socket")
                 updSocket = nil
-                return
+                throw STUNError.CantBindToLocalPort(localPort)
             }
         }
-        
+    }
+    
+    func startReceiving() throws {
+        guard let updSocket = updSocket else { throw STUNError.CantRunUdpSocket }
         do {
-            try updSocket?.beginReceiving()
+            try updSocket.beginReceiving()
         } catch {
-            delegate?.error(errorText: "Can't run UDP socket")
-            updSocket = nil
-            return
+            self.updSocket = nil
+            throw STUNError.CantRunUdpSocket
         }
+    }
 
-        delegate?.verbose("Prepare binding packet to sent")
+    
+    func prepareEmptyBindingRequest() -> STUNPacket {
+        delegate?.verbose("Prepare empty binding packet to sent")
 
-        bindingPacket = STUNPacketToSend.getBindingPacket()
+        return STUNPacket.getBindingPacket()
+    }
+    
+    func prepareBindingRequestChangePort(to port: UInt16 = 3478) -> STUNPacket {
+        delegate?.verbose("Prepare change port to \(port) binding packet to sent")
         
-   
-        guard let dataToSend: Data = bindingPacket?.getPacketData(), dataToSend.count == 20  else {
-            delegate?.error(errorText: "Can't prepare binding packet")
-            updSocket = nil
-            return
-        }
-        
+        return STUNPacket.getBindingPacket(responseFromAddress: stunAddress, port: port)
+    }
+    
+    func sendData(_ data: Data) {
         delegate?.verbose("Sending binding packet...")
-
-        updSocket?.send(dataToSend, toHost: stunServer, port: stunPort, withTimeout: STUNRequestTimeout, tag: PacketsTags.BindingRequest.rawValue)
+        
+        updSocket?.send(data, toHost: stunAddress, port: stunPort, withTimeout: 3.0, tag: PacketsTags.BindingRequest.rawValue)
+    }
+    
+    func closeSocket() {
+        if updSocket != nil {
+            updSocket?.close()
+        }
+    }
+    
+    func createSocket() {
+        updSocket = GCDAsyncUdpSocket(delegate: self, delegateQueue:  asyncQueue)
+    }
+    
+    func getReceivedPacket(from data: Data) -> STUNPacket? {
+        guard let receivedPacket: STUNPacket = STUNPacket.getBindingAnswer(from: data) else {
+            return nil
+        }
+        
+        guard receivedPacket.magicCookie == (bindingPacket?.magicCookie)!, receivedPacket.transactionIdBindingRequest == (bindingPacket?.transactionIdBindingRequest)!  else {
+            delegate?.error(errorText: "Received data from another request")
+            return nil
+        }
+        
+        delegate?.verbose("Receive packet \(MessageType(rawValue: UInt16(receivedPacket.msgRequestType[0]) * 256 + UInt16(receivedPacket.msgRequestType[1])))")
+        
+        //get responss body length
+        let responseBodyLength: Int = Int(receivedPacket.bodyLength[0]) * 256 + Int(receivedPacket.bodyLength[1])
+        
+        delegate?.verbose("Received data body has length: \(responseBodyLength)")
+        
+        guard responseBodyLength == receivedPacket.body.count else {
+            delegate?.error(errorText: "Received data has unproper body length")
+            return nil
+        }
+        
+        return receivedPacket
+    }
+    
+    func getAttributes(from receivedPacket: STUNPacket) -> [STUNAttribute] {
+        var attributes: [STUNAttribute] = []
+        var body: Array<UInt8> = receivedPacket.body
+        while true {
+            do {
+                let attribute: STUNAttribute = try STUNAttribute.getAttribute(from: body)
+                body.removeFirst(attribute.getAttributeLength())
+                attributes.append(attribute)
+                try delegate?.verbose("\(attribute.description()) \n")
+                if body.count < 4 || attribute.getAttributeType() == .ERROR_CODE {
+                    break
+                }
+            } catch  {
+                delegate?.error(errorText: "Error in response parsing")
+                return []
+            }
+        }
+        return attributes
     }
 }
 
@@ -254,159 +278,34 @@ extension STUNClient: GCDAsyncUdpSocketDelegate {
     
     public func udpSocket(_ sock: GCDAsyncUdpSocket, didReceive data: Data, fromAddress address: Data, withFilterContext filterContext: Any?) {
         
-        delegate?.verbose("Received data from STUN server")
-        
-        // Checks
-        //
+        delegate?.verbose("Received data from STUN server with address: \(address[4]).\(address[5]).\(address[6]).\(address[7]) port: \(UInt16(address[2]) * 256 + UInt16(address[3]))")
+
         if data.count < 20 {
             delegate?.error(errorText: "Received data length too short")
             return;
         }
         
-        let receivedPacket: STUNPacketToSend = STUNPacketToSend.getBindingAnswer(from: data)
-        
-        guard receivedPacket.magicCookie == (bindingPacket?.magicCookie)!, receivedPacket.transactionIdBindingRequest == (bindingPacket?.transactionIdBindingRequest)!  else {
-             delegate?.error(errorText: "Received data from another request")
-            return
-        }
-
-        //
-        // Success Response: 0x0101
-        // Error Response:   0x0111
-        //
-        if receivedPacket.msgRequestType != [0x01, 0x01] {
-            delegate?.error(errorText: "Received error from STUN server")
+        guard let receivedPacket = getReceivedPacket(from: data) else {
             return
         }
         
-        
-        // get responss body length
-        let responseBodyLength: Int = Int(receivedPacket.bodyLength[0]) * 256 + Int(receivedPacket.bodyLength[1])
+        let _ = getAttributes(from: receivedPacket)
 
-        delegate?.verbose("Received data body has length: \(responseBodyLength)")
-
-        guard responseBodyLength == receivedPacket.body.count else {
-            delegate?.error(errorText: "Received data has unproper body length")
-            return
+        switch self.state {
+        case .FirstRequest:
+            bindingPacket = prepareBindingRequestChangePort(to: 50000)
+            sendData(bindingPacket.getPacketData())
+            state = .SecondRequestWithAnotherPort
+            break
+            
+        case .SecondRequestWithAnotherPort:
+            updSocket?.close()
+            delegate?.completed(nat: NATParams(myExternalIP: "", myExternalPort: 2, natType: .FullCone))
+            break
+            
+        default:
+            break
         }
-        
-        var attributes: Array<STUNAttribute> = []
-        var body: Array<UInt8> = receivedPacket.body
-        while true {
-            let attribute: STUNAttribute = STUNAttribute.getAttribute(from: body)
-            body.removeFirst(attribute.getAttributeLength())
-            delegate?.verbose("Attribute:  \(attribute.description()) \n")
-            attributes.append(attribute)
-            if body.count < 4 {
-                break
-            }
-        }
-        
-        updSocket?.close()
-        delegate?.completed(nat: NATParams(myExternalIP: "", myExternalPort: 2, natType: .FullCone))
-        
-/*
-        int i = 20; // current reading position in the response binary data.  At 20 byte starts STUN Attributes
-        //
-        // STUN Attributes
-        //
-        // After the STUN header are zero or more attributes.  Each attribute
-        // MUST be TLV encoded, with a 16-bit type, 16-bit length, and value.
-        // Each STUN attribute MUST end on a 32-bit boundary.  As mentioned
-        // above, all fields in an attribute are transmitted most significant
-        // bit first.
-        //
-        //
-        while(i < responseBodyLength+20){ // proccessing the response
-            
-            NSData *mappedAddressData = [data subdataWithRange:NSMakeRange(i, 2)];
-            
-            if([mappedAddressData isEqualToData:[NSData dataWithBytes:"\x00\x01" length:2]]){ // MAPPED-ADDRESS
-                int maddrStartPos = i + 2 + 2 + 1 + 1;
-                mport = [data subdataWithRange:NSMakeRange(maddrStartPos, 2)];
-                maddr = [data subdataWithRange:NSMakeRange(maddrStartPos+2, 4)];
-            }
-            if([mappedAddressData isEqualToData:[NSData dataWithBytes:"\x80\x20" length:2]] || // XOR-MAPPED-ADDRESS
-                [mappedAddressData isEqualToData:[NSData dataWithBytes:"\x00\x20" length:2]]){
-                
-                // apparently, all public stun servers tested use 0x8020 (in the Comprehension-optional range) -
-                // as the XOR-MAPPED-ADDRESS Attribute type number instead of 0x0020 specified in RFC5389
-                int xmaddrStartPos = i + 2 + 2 + 1 + 1;
-                xmport=[data subdataWithRange:NSMakeRange(xmaddrStartPos, 2)];
-                xmaddr=[data subdataWithRange:NSMakeRange(xmaddrStartPos+2, 4)];
-            }
-            
-            i += 2;
-            
-            unsigned attribValueLength = 0;
-            NSScanner *scanner = [NSScanner scannerWithString:[[[data subdataWithRange:NSMakeRange(i, 2)] description]
-                substringWithRange:NSMakeRange(1, 4)]];
-            [scanner scanHexInt:&attribValueLength];
-            
-            if(attribValueLength % 4 > 0){
-                attribValueLength += 4 - (attribValueLength % 4); // adds stun attribute value padding
-            }
-            
-            i += 2;
-            i += attribValueLength;
-        }
-        
-        
-        NSString *ip = nil;
-        NSString *port = nil;
-        
-        if(maddr != nil){
-            ip = [self extractIP:maddr];
-            port = [self extractPort:mport];
-            
-            STUNLog(@"MAPPED-ADDRESS: %@", maddr);
-            STUNLog(@"mport: %@", mport);
-        }else{
-            STUNLog(@"STUN No MAPPED-ADDRESS found.");
-        }
-        
-        if(xmaddr != nil){
-            
-            // XOR address
-            int xmaddrInt = [self parseIntFromHexData:xmaddr];
-            int magicCookieInt = [self parseIntFromHexData:magicCookie];
-            //
-            int32_t xoredAddr = CFSwapInt32HostToBig(magicCookieInt ^ xmaddrInt);
-            NSData *xAddr = [NSData dataWithBytes:&xoredAddr length:4];
-            ip = [self extractIP:xAddr];
-            
-            // XOR port
-            int xmportInt = [self parseIntFromHexData:xmport];
-            int magicCookieHighBytesInt = [self parseIntFromHexData:[magicCookie subdataWithRange:NSMakeRange(0, 2)]];
-            //
-            int32_t xoredPort = CFSwapInt16HostToBig(magicCookieHighBytesInt ^ xmportInt);
-            NSData *xPort = [NSData dataWithBytes:&xoredPort length:2];
-            port = [self extractPort:xPort];
-            
-            STUNLog(@"XOR-MAPPED-ADDRESS: %@", xAddr);
-            STUNLog(@"xmport: %@", xPort);
-            
-        }else{
-            STUNLog(@"STUN No XOR-MAPPED-ADDRESS found.");
-        }
-        
-        NSNumber *isNatPortRandom = [NSNumber numberWithBool:[sock localPort] != [port intValue]];
-        
-        STUNLog(@"\n");
-        STUNLog(@"=======STUN========");
-        STUNLog(@"STUN IP: %@", ip);
-        STUNLog(@"STUN Port: %@", port);
-        STUNLog(@"STUN Port randomization: %d", [sock localPort] != [port intValue]);
-        STUNLog(@"===================");
-        STUNLog(@"\n");
-        
-        // notify delegate
-        if([delegate respondsToSelector:@selector(didReceivePublicIPandPort:)]){
-            NSDictionary *result = [NSDictionary dictionaryWithObjectsAndKeys:ip, publicIPKey, port, publicPortKey, isNatPortRandom, isPortRandomization, nil];
-            [udpSocket setDelegate:delegate];
-            [delegate didReceivePublicIPandPort:result];
-        }
-        */
     }
     
     public func udpSocketDidClose(_ sock: GCDAsyncUdpSocket, withError error: Error?) {
