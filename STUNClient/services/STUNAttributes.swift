@@ -56,26 +56,26 @@ enum AttributeType: Int {
         switch self {
         case .MAPPED_ADDRESS, .RESPONSE_ORIGIN, .RESPONSE_ADDRESS, .CHANGED_ADDRESS, .SOURCE_ADDRESS, .OTHER_ADDRESS:
             guard let packet: NORMAL_ADDRESS_ATTRIBUTE_PACKET = NORMAL_ADDRESS_ATTRIBUTE_PACKET.getFromData(data) else {
-                throw STUNError.CantConvertValue
+                throw STUNError.cantConvertValue
             }
             return packet
             
         case .USERNAME, .PASSWORD, .SOFTWARE:
             guard let packet: STRING_PACKET = STRING_PACKET.getFromData(data) else {
-                throw STUNError.CantConvertValue
+                throw STUNError.cantConvertValue
             }
             return packet
             
         case .ERROR_CODE:
             guard let packet: ERROR_CODE_ATTRIBUTE_PACKET = ERROR_CODE_ATTRIBUTE_PACKET.getFromData(data)
                 else {
-                    throw STUNError.CantConvertValue
+                    throw STUNError.cantConvertValue
             }
             return packet
             
         case .XOR_MAPPED_ADDRESS:
             guard let packet = XOR_MAPPED_ADDRESS_ATTRIBUTE_PACKET.getFromData(data) else {
-                throw STUNError.CantConvertValue
+                throw STUNError.cantConvertValue
             }
             return packet
             

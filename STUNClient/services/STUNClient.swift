@@ -33,10 +33,9 @@ public struct NATParams {
 }
 
 public enum STUNError: Error {
-    case CantConvertValue
-    case CantPreparePacket
-    case CantBindToLocalPort(UInt16)
-    case CantRunUdpSocket
+    case cantConvertValue
+    case cantPreparePacket
+    case cantRunUdpSocket
 }
 
 public enum STUNServerError: UInt16 {
@@ -85,13 +84,18 @@ enum MessageType: UInt16 {
 }
 
 struct STUNPacket {
-    let msgRequestType: [UInt8] //2 bytes
-    let bodyLength: [UInt8] //2 bytes
-    let magicCookie: [UInt8] //4 bytes
-    let transactionIdBindingRequest: [UInt8] //12 bytes
-    let body: [UInt8] //attributes
+    private static let stunHeaderLength: UInt16 = 20
+    private let msgRequestType: [UInt8] //2 bytes
+    private let bodyLength: [UInt8] //2 bytes
+    private let magicCookie: [UInt8] //4 bytes
+    private let transactionIdBindingRequest: [UInt8] //12 bytes
+    private let body: [UInt8] //attributes
     
-    static func getBindingPacket(responseFromAddress: String = "", port: UInt16 = 0) -> STUNPacket  {
+    func getPacketData() -> Data {
+        return Data(msgRequestType + bodyLength + magicCookie + transactionIdBindingRequest + body)
+    }
+    
+    static func getBindingRequest(responseFromAddress: String = "", port: UInt16 = 0) -> STUNPacket  {
         
         let body: [UInt8] = responseFromAddress == "" ? []: getChangeRequestAttribute() + getResponseAddressAttribute(responseFromAddress: responseFromAddress, port: port)
         
@@ -114,26 +118,225 @@ struct STUNPacket {
                                            body: NORMAL_ADDRESS_ATTRIBUTE_PACKET.formPacket(with: responseFromAddress, and: port).getPacketData()).toArray()
     }
     
-    func getPacketData() -> Data {
-        return Data(msgRequestType + bodyLength + magicCookie + transactionIdBindingRequest + body)
+    static func parse(from data: Data) -> STUNPacket? {
+        guard data.count >= stunHeaderLength, data.count == Int(data[2])*256 + Int(data[3]) + 20 else {
+            return nil
+        }
+        
+        return STUNPacket(msgRequestType: [UInt8](data[0..<2]),
+                                bodyLength:  [UInt8](data[2..<4]),
+                                magicCookie: [UInt8](data[4..<8]),
+                                transactionIdBindingRequest: [UInt8](data[8..<20]),
+                                body: [UInt8](data[20..<data.count]))
     }
     
-    static func getBindingAnswer(from answerPacket: Data) -> STUNPacket? {
-        guard answerPacket.count >= 20 else { return nil }
+    static func parse(from data: UnsafeRawBufferPointer) -> STUNPacket? {
+        guard data.count >= stunHeaderLength, data.count == Int(data[2])*256 + Int(data[3]) + 20 else {
+            return nil
+        }
         
-        return STUNPacket(msgRequestType: [UInt8](answerPacket[0..<2]),
-                                bodyLength:  [UInt8](answerPacket[2..<4]),
-                                magicCookie: [UInt8](answerPacket[4..<8]),
-                                transactionIdBindingRequest: [UInt8](answerPacket[8..<20]),
-                                body: [UInt8](answerPacket[20..<answerPacket.count]))
+        return STUNPacket(msgRequestType: [UInt8](data[0..<2]),
+                                bodyLength:  [UInt8](data[2..<4]),
+                                magicCookie: [UInt8](data[4..<8]),
+                                transactionIdBindingRequest: [UInt8](data[8..<20]),
+                                body: [UInt8](data[20..<data.count]))
     }
 }
 
-open class STUNClient: NSObject {
+protocol StunTransport {
+    
+}
+
+
+
+final class StunCodec: ByteToMessageDecoder {
+    public typealias InboundIn = ByteBuffer
+    public typealias InboundOut = STUNPacket
+        
+    public func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
+        guard let packet = buffer.withUnsafeReadableBytes({pointer in STUNPacket.parse(from: pointer)}) else {
+             return .needMoreData
+        }
+        
+        buffer.moveReaderIndex(to: packet.getPacketData().count)
+        
+        context.fireChannelRead(self.wrapInboundOut(packet))
+        
+        return .continue
+    }
+}
+
+private final class EnvelopToByteBufferConverter: ChannelInboundHandler {
+    public typealias InboundIn = AddressedEnvelope<ByteBuffer>
+    public typealias InboundOut = ByteBuffer
+    
+    public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+        let envelope = self.unwrapInboundIn(data)
+        let byteBuffer = envelope.data
+        context.fireChannelRead(self.wrapInboundOut(byteBuffer))
+    }
+    
+    public func errorCaught(context: ChannelHandlerContext, error: Error) {
+        print("[EnvelopToByteBufferConverter] error: ", error)
+        context.close(promise: nil)
+    }
+}
+
+private final class StunTransportNioImpl: ChannelInboundHandler {
+    public typealias InboundIn = STUNPacket
+    public typealias OutboundOut = AddressedEnvelope<ByteBuffer>
+    
+    public func sendBindingRequest(channel: Channel, toStunServerAddress address: String, toStunServerPort port: Int) {
+        let requestData = STUNPacket.getBindingRequest().getPacketData()
+        
+        do {
+            let remoteAddress = try SocketAddress.makeAddressResolvingHost(address, port: port)
+            
+            var buffer = channel.allocator.buffer(capacity: requestData.count)
+            buffer.writeBytes(requestData)
+
+            let envolope = AddressedEnvelope<ByteBuffer>(remoteAddress: remoteAddress, data: buffer)
+            
+            channel.writeAndFlush(self.wrapOutboundOut(envolope), promise: nil)
+        } catch {
+            print("error: ", error)
+        }
+    }
+    
+    public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+        let packet = self.unwrapInboundIn(data)
+        
+        let string = String(describing: packet)
+        print("Received: '\(string)' back from the server, closing channel.")
+    }
+    
+    public func errorCaught(context: ChannelHandlerContext, error: Error) {
+        print("error: ", error)
+        context.close(promise: nil)
+    }
+}
+
+extension StunTransportNioImpl: StunTransport {
+    
+}
+
+open class StunClient {
+    private enum ClientMode {
+        case whoAmI
+        case natTypeDiscovery
+    }
+    
+    private let stunIpAddress: String
+    private let stunPort: UInt16
+    private let localPort: UInt16
+    private var successCallback: ((String, Int) -> ())?
+    private var natTypeCallback: ((NATParams) -> ())?
+    private var errorCallback: ((STUNError) -> ())?
+    private var verboseCallback: ((String) -> ())?
+    private var mode: ClientMode = .whoAmI
+    
+    private lazy var group = { MultiThreadedEventLoopGroup(numberOfThreads: 1) }()
+    private lazy var bootstrap = {
+        DatagramBootstrap(group: group)
+        .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+        .channelInitializer { channel in
+            channel.pipeline.addHandler(EnvelopToByteBufferConverter()).flatMap { v in
+                channel.pipeline.addHandler(ByteToMessageHandler(StunCodec())).flatMap { v in
+                    channel.pipeline.addHandler(self.stunHandler)
+                }
+            }
+        }
+    }()
+    
+    private lazy var stunHandler: StunTransportNioImpl = {
+       StunTransportNioImpl()
+    }()
+    
+    required public init(stunIpAddress: String, stunPort: UInt16, localPort: UInt16 = 0) {
+        self.stunIpAddress = stunIpAddress
+        self.stunPort = stunPort
+        self.localPort = localPort == 0 ? UInt16.random(in: 10000..<55000) : localPort
+    }
+    
+    deinit {
+         try! group.syncShutdownGracefully()
+    }
+    
+    public func whoAmI() -> StunClient {
+        mode = .whoAmI
+        return self
+    }
+    
+    public func discoverNatType() -> StunClient {
+        mode = .natTypeDiscovery
+        return self
+    }
+    
+    public func ifWhoAmISuccessful(_ callback: @escaping (String, Int) -> ()) -> StunClient {
+        guard successCallback == nil else { fatalError("successCallback can be assigned only once") }
+        
+        successCallback = callback
+        return self
+    }
+    
+    public func ifNatTypeSuccessful(_ callback: @escaping (NATParams) -> ()) -> StunClient {
+        guard natTypeCallback == nil else { fatalError("natTypeCallback can be assigned only once") }
+        
+        natTypeCallback = callback
+        return self
+    }
+    
+    public func ifError(_ callback: @escaping (STUNError) -> ()) -> StunClient {
+        guard errorCallback == nil else { fatalError("errorCallback can be assigned only once") }
+        
+        errorCallback = callback
+        return self
+    }
+    
+    public func verbose(_ callback: @escaping (String) -> ()) -> StunClient {
+        guard verboseCallback == nil else { fatalError("verboseCallback can be assigned only once") }
+        
+        verboseCallback = callback
+        return self
+    }
+    
+    public func start() {
+        switch mode {
+        case .whoAmI:
+            startWhoAmI()
+        case .natTypeDiscovery:
+            startNatTypeDiscovery()
+        }
+    }
+    
+    private func startWhoAmI() {
+        DispatchQueue.global().async { [weak self] in
+            guard let self = self else { return }
+            do {
+                try self.startStunBindingProcedure().whenSuccess({ channel in
+                    self.stunHandler.sendBindingRequest(channel: channel, toStunServerAddress: self.stunIpAddress, toStunServerPort: Int(self.stunPort))
+                    })
+            } catch {
+                print((error as? NIO.IOError)?.description ?? error.localizedDescription)
+                self.errorCallback?(.cantRunUdpSocket)
+            }
+        }
+    }
+    
+    private func startNatTypeDiscovery() {
+        
+    }
+    
+    private func startStunBindingProcedure() throws -> EventLoopFuture<Channel>  {
+        return self.bootstrap.bind(host: "0.0.0.0", port: Int(self.localPort))
+    }
+}
+/*
+public struct STUNClient {
     fileprivate weak var delegate: STUNClientDelegate?
     fileprivate var stunAddress: String!
     fileprivate var stunPort: UInt16!
-    fileprivate var updSocket: GCDAsyncUdpSocket?
+
     fileprivate lazy var asyncQueue: DispatchQueue = {
         return DispatchQueue(label: "STUNClient")
     }()
@@ -141,6 +344,7 @@ open class STUNClient: NSObject {
     fileprivate var bindingPacket: STUNPacket!
     fileprivate var state: STUNState = .Init
     fileprivate var attributesFromEmptyRequestFunc: (([STUNAttribute]) -> ())?
+    
     
     required public init(delegate: STUNClientDelegate?) {
         super.init()
@@ -268,7 +472,7 @@ open class STUNClient: NSObject {
     }
 }
 
-extension STUNClient: GCDAsyncUdpSocketDelegate {
+extension STUNClient: ChannelInboundHandler {
     public func udpSocket(_ sock: GCDAsyncUdpSocket, didSendDataWithTag tag: Int) {
         delegate?.verbose("Sended binding packet sucessfully")
     }
@@ -313,3 +517,4 @@ extension STUNClient: GCDAsyncUdpSocketDelegate {
         delegate?.verbose("Socket has been closed")
     }
 }
+*/
