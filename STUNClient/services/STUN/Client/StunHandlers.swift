@@ -29,6 +29,13 @@ final class StunCodec: ByteToMessageDecoder {
 final class EnvelopToByteBufferConverter: ChannelInboundHandler {
     public typealias InboundIn = AddressedEnvelope<ByteBuffer>
     public typealias InboundOut = ByteBuffer
+    public typealias ErrorHandler = ((StunError) -> ())?
+    
+    private let errorHandler: ErrorHandler
+    
+    init(errorHandler: ErrorHandler) {
+        self.errorHandler = errorHandler
+    }
     
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let envelope = self.unwrapInboundIn(data)
@@ -37,7 +44,7 @@ final class EnvelopToByteBufferConverter: ChannelInboundHandler {
     }
     
     public func errorCaught(context: ChannelHandlerContext, error: Error) {
-        print("[EnvelopToByteBufferConverter] error: ", error)
+        errorHandler?(.cantRead(error.localizedDescription))
         context.close(promise: nil)
     }
 }
@@ -84,5 +91,19 @@ final class StunInboundHandler: ChannelInboundHandler {
     public func errorCaught(context: ChannelHandlerContext, error: Error) {
         errorHandler?(.cantRead(error.localizedDescription))
         context.close(promise: nil)
+    }
+}
+
+extension StunPacket {
+    static func parse(from data: UnsafeRawBufferPointer) -> StunPacket? {
+        guard data.count >= StunPacket.stunHeaderLength, data.count == Int(data[2])*256 + Int(data[3]) + 20 else {
+            return nil
+        }
+        
+        return StunPacket(msgRequestType: [UInt8](data[0..<2]),
+                                bodyLength:  [UInt8](data[2..<4]),
+                                magicCookie: [UInt8](data[4..<8]),
+                                transactionIdBindingRequest: [UInt8](data[8..<20]),
+                                body: [UInt8](data[20..<data.count]))
     }
 }

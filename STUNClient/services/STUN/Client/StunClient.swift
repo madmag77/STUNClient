@@ -52,17 +52,18 @@ open class StunClient {
         DatagramBootstrap(group: group)
         .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
         .channelInitializer { channel in
-            channel.pipeline.addHandler(EnvelopToByteBufferConverter())
+            channel.pipeline.addHandler(EnvelopToByteBufferConverter(errorHandler: self.errorCallback))
                 .flatMap {
                     channel.pipeline.addHandler(ByteToMessageHandler(StunCodec()))
                 }
                 .flatMap {
-                    channel.pipeline.addHandler(self.stunHandler!)
+                    channel.pipeline.addHandler(self.stunHandler)
                 }
         }
     }()
     
-    private var stunHandler: StunInboundHandler?
+    private lazy var stunHandler = { StunInboundHandler(errorHandler: self.errorCallback,
+                                                          attributesHandler: self.attributesHandler) }()
     
     required public init(stunIpAddress: String, stunPort: UInt16, localPort: UInt16 = 0) {
         self.stunIpAddress = stunIpAddress
@@ -138,11 +139,10 @@ open class StunClient {
     private func startWhoAmI() {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
-            self.stunHandler = StunInboundHandler(errorHandler: self.errorCallback,
-                                                    attributesHandler: self.attributesHandler)
+
             do {
                 try self.startStunBindingProcedure().whenSuccess({ channel in
-                    self.stunHandler?.sendBindingRequest(channel: channel, toStunServerAddress: self.stunIpAddress, toStunServerPort: Int(self.stunPort))
+                    self.stunHandler.sendBindingRequest(channel: channel, toStunServerAddress: self.stunIpAddress, toStunServerPort: Int(self.stunPort))
                     })
             } catch {
                 self.errorCallback?(.cantRunUdpSocket((error as? NIO.IOError)?.description ?? error.localizedDescription))

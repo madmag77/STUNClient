@@ -14,12 +14,25 @@ struct RandomTransactionID {
 }
 
 struct StunPacket {
-    private static let stunHeaderLength: UInt16 = 20
+    public static let stunHeaderLength: UInt16 = 20
     private let msgRequestType: [UInt8] //2 bytes
     private let bodyLength: [UInt8] //2 bytes
     private let magicCookie: [UInt8] //4 bytes
     private let transactionIdBindingRequest: [UInt8] //12 bytes
     private let body: [UInt8] //attributes
+    
+    init(msgRequestType: [UInt8],
+         bodyLength: [UInt8],
+         magicCookie: [UInt8],
+         transactionIdBindingRequest: [UInt8],
+         body: [UInt8]) {
+        
+        self.msgRequestType = msgRequestType
+        self.bodyLength = bodyLength
+        self.magicCookie = magicCookie
+        self.transactionIdBindingRequest = transactionIdBindingRequest
+        self.body = body
+    }
     
     func toData() -> Data {
         return Data(msgRequestType + bodyLength + magicCookie + transactionIdBindingRequest + body)
@@ -49,18 +62,6 @@ struct StunPacket {
     }
     
     static func parse(from data: Data) -> StunPacket? {
-        guard data.count >= stunHeaderLength, data.count == Int(data[2])*256 + Int(data[3]) + 20 else {
-            return nil
-        }
-        
-        return StunPacket(msgRequestType: [UInt8](data[0..<2]),
-                                bodyLength:  [UInt8](data[2..<4]),
-                                magicCookie: [UInt8](data[4..<8]),
-                                transactionIdBindingRequest: [UInt8](data[8..<20]),
-                                body: [UInt8](data[20..<data.count]))
-    }
-    
-    static func parse(from data: UnsafeRawBufferPointer) -> StunPacket? {
         guard data.count >= stunHeaderLength, data.count == Int(data[2])*256 + Int(data[3]) + 20 else {
             return nil
         }
