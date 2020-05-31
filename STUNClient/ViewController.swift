@@ -36,14 +36,16 @@ class ViewController: UIViewController {
 //            self.error(errorText: "Unexpeted error \(error)")
 //        }
         //stun.l.google.com
-        client = StunClient(stunIpAddress: "64.233.163.127", stunPort: 19302, localPort: 14135)
+        let localPort = 14135
+        stunLog.text = "Run stun procedure from local address \(localPort)"
+        client = StunClient(stunIpAddress: "64.233.163.127", stunPort: 19302, localPort: UInt16(localPort))
         let successCallback: (String, Int) -> () = { [weak self] (myAddress: String, myPort: Int) in
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 self.stunLog.text = self.stunLog.text + "\n" + "COMPLETED, my address: " + myAddress + " my port: " + String(myPort)
             }
         }
-        let errorCallback: (STUNError) -> () = { [weak self] error in
+        let errorCallback: (StunError) -> () = { [weak self] error in
                 DispatchQueue.main.async {
                     guard let self = self else { return }
                     self.stunLog.text = self.stunLog.text + "\n" + "ERROR: " + error.localizedDescription
@@ -63,42 +65,5 @@ class ViewController: UIViewController {
             .ifError(errorCallback)
             .verbose(verboseCallback)
             .start()
-    }
-}
-
-
-//MARK: STUNClientDelegate
-extension ViewController: STUNClientDelegate {
-    func verbose(_ logText: String) {
-        DispatchQueue.main.async {
-            self.stunLog.text = self.stunLog.text + "\n" + logText
-        }
-    }
-    
-    func error(errorText: String) {
-        DispatchQueue.main.async {
-            self.stunLog.text = self.stunLog.text + "\n" + "ERROR: " + errorText
-        }
-    }
-    
-    func completed(nat: NATParams) {
-        if secondTime {
-            return
-        }
-        secondTime = true
-        
-//        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(500), execute: {
-//           // self.stunLog.text = "COMPLETED: " + "\n" + nat.description + "\n"
-//            self.stunLog.text = self.stunLog.text + "\n" + "-----==SECOND TIME==-----\n"
-//            do {
-//                try self.stunClient.getNATParams(stunAddress: "64.233.163.127", localPort: 14135, stunPort: 19302)
-//            } catch STUNError.CantBindToLocalPort(let port) {
-//                self.error(errorText: "Cant Bind To Local Port \(port)")
-//            } catch STUNError.CantRunUdpSocket {
-//                self.error(errorText: "Cant Run UDP Socket")
-//            } catch {
-//                self.error(errorText: "Unexpeted error \(error)")
-//            }
-//        })
     }
 }

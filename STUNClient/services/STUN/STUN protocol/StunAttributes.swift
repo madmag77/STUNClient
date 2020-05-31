@@ -1,14 +1,12 @@
-//
-//  STUNAttributes.swift
-//  STUNClient
-//
-//  Created by Artem Goncharov on 09/04/2017.
-//  Copyright © 2017 MadMag. All rights reserved.
-//
-
 import Foundation
 
-protocol Packet {
+/// Umbrella protocol for all stun atrributes with address and port
+protocol GeneralAddressAttribute {
+    var address: String { get }
+    var port: UInt16 { get }
+}
+
+protocol Attribute {
     var description: String {get}
 }
 
@@ -52,56 +50,57 @@ enum AttributeType: Int {
     case OTHER_ADDRESS =	0x802C
     case UNKNOWN = 0
     
-    func getPacket(from data: Data) throws -> Packet {
+    func getAttribute(from data: Data) -> Attribute? {
         switch self {
         case .MAPPED_ADDRESS, .RESPONSE_ORIGIN, .RESPONSE_ADDRESS, .CHANGED_ADDRESS, .SOURCE_ADDRESS, .OTHER_ADDRESS:
-            guard let packet: NORMAL_ADDRESS_ATTRIBUTE_PACKET = NORMAL_ADDRESS_ATTRIBUTE_PACKET.getFromData(data) else {
-                throw STUNError.cantConvertValue
+            guard let attribute: NORMAL_ADDRESS_ATTRIBUTE = NORMAL_ADDRESS_ATTRIBUTE.fromData(data) else {
+                return nil
             }
-            return packet
+            return attribute
             
         case .USERNAME, .PASSWORD, .SOFTWARE:
-            guard let packet: STRING_PACKET = STRING_PACKET.getFromData(data) else {
-                throw STUNError.cantConvertValue
+            guard let attribute: STRING_ATTRIBUTE = STRING_ATTRIBUTE.fromData(data) else {
+                return nil
             }
-            return packet
+            return attribute
             
         case .ERROR_CODE:
-            guard let packet: ERROR_CODE_ATTRIBUTE_PACKET = ERROR_CODE_ATTRIBUTE_PACKET.getFromData(data)
+            guard let attribute: ERROR_CODE_ATTRIBUTE = ERROR_CODE_ATTRIBUTE.fromData(data)
                 else {
-                    throw STUNError.cantConvertValue
+                    return nil
             }
-            return packet
+            return attribute
             
         case .XOR_MAPPED_ADDRESS:
-            guard let packet = XOR_MAPPED_ADDRESS_ATTRIBUTE_PACKET.getFromData(data) else {
-                throw STUNError.cantConvertValue
+            guard let attribute = XOR_MAPPED_ADDRESS_ATTRIBUTE.fromData(data) else {
+                return nil
             }
-            return packet
+            return attribute
             
         default:
-            return STRING_PACKET.getFromString("raw content: \(data) \n")
+            return STRING_ATTRIBUTE.getFromString("raw content: \(data) \n")
         }
     }
 }
 
-struct STRING_PACKET: Packet {
-    let packet: String
-    static func getFromData(_ data: Data) -> STRING_PACKET? {
+struct STRING_ATTRIBUTE: Attribute {
+    let content: String
+    
+    static func fromData(_ data: Data) -> STRING_ATTRIBUTE? {
         guard data.count > 0  else { return nil}
-        return STRING_PACKET(packet: String(data: data, encoding: .utf8)!)
+        return STRING_ATTRIBUTE(content: String(data: data, encoding: .utf8)!)
     }
     
-    static func getFromString(_ string: String) -> STRING_PACKET {
-        return STRING_PACKET(packet: string)
+    static func getFromString(_ string: String) -> STRING_ATTRIBUTE {
+        return STRING_ATTRIBUTE(content: string)
     }
     
     var description: String {
-        return packet
+        return content
     }
 }
 
-struct NORMAL_ADDRESS_ATTRIBUTE_PACKET: Packet {
+struct NORMAL_ADDRESS_ATTRIBUTE: Attribute {
     let family: UInt8
     let port: UInt16
     let addr1: UInt8
@@ -113,9 +112,17 @@ struct NORMAL_ADDRESS_ATTRIBUTE_PACKET: Packet {
         return "Family: \(self.family) \n Port: \(UInt16(self.port))  \n Address: \(self.addr1).\(self.addr2).\(self.addr3).\(self.addr4)"
     }
     
-    static func formPacket(with address:String, and port:UInt16) -> NORMAL_ADDRESS_ATTRIBUTE_PACKET {
-        let address: [UInt8] = NORMAL_ADDRESS_ATTRIBUTE_PACKET.address(from: address)
-        return NORMAL_ADDRESS_ATTRIBUTE_PACKET(
+    static func formAttribute(with address:String, and port:UInt16) -> NORMAL_ADDRESS_ATTRIBUTE {
+        let convertStringIp: (String) -> [UInt8] = { stringIp in
+            let components = stringIp.components(separatedBy: ".")
+            let address: [UInt8] = components.compactMap {
+                UInt8($0)
+            }
+            return address
+        }
+        
+        let address: [UInt8] = convertStringIp(address)
+        return NORMAL_ADDRESS_ATTRIBUTE(
             family: 1,
             port: port,
             addr1: address[0],
@@ -125,12 +132,12 @@ struct NORMAL_ADDRESS_ATTRIBUTE_PACKET: Packet {
         )
     }
     
-    static func getFromData(_ data: Data) -> NORMAL_ADDRESS_ATTRIBUTE_PACKET? {
+    static func fromData(_ data: Data) -> NORMAL_ADDRESS_ATTRIBUTE? {
         guard data.count == 8 else {
             return nil
         }
         let port = UInt16(data[2]) * 256 + UInt16(data[3])
-        return NORMAL_ADDRESS_ATTRIBUTE_PACKET(family: data[1],
+        return NORMAL_ADDRESS_ATTRIBUTE(family: data[1],
                                                port: port,
                                                addr1: data[4],
                                                addr2: data[5],
@@ -139,20 +146,19 @@ struct NORMAL_ADDRESS_ATTRIBUTE_PACKET: Packet {
         )
     }
     
-    func getPacketData() -> [UInt8] {
+    func toData() -> [UInt8] {
         return [0x0, family, UInt8(port / 256), UInt8(port % 256), addr1, addr2, addr3, addr4]
-    }
-    
-    static func address(from string: String) -> [UInt8] {
-        let components = string.components(separatedBy: ".")
-        let address: [UInt8] = components.flatMap {
-            UInt8($0)
-        }
-        return address
     }
 }
 
-struct XOR_MAPPED_ADDRESS_ATTRIBUTE_PACKET: Packet {
+extension NORMAL_ADDRESS_ATTRIBUTE: GeneralAddressAttribute {
+    var address: String {
+        return "\(self.addr1).\(self.addr2).\(self.addr3).\(self.addr4)"
+    }
+}
+
+
+struct XOR_MAPPED_ADDRESS_ATTRIBUTE: Attribute {
     let family: UInt8
     let port: UInt16
     let addr1: UInt8
@@ -164,12 +170,12 @@ struct XOR_MAPPED_ADDRESS_ATTRIBUTE_PACKET: Packet {
         return "Family: \(self.family) \n Port: \(UInt16(self.port))  \n Address: \(self.addr1).\(self.addr2).\(self.addr3).\(self.addr4)"
     }
     
-    static func getFromData(_ data: Data) -> XOR_MAPPED_ADDRESS_ATTRIBUTE_PACKET? {
+    static func fromData(_ data: Data) -> XOR_MAPPED_ADDRESS_ATTRIBUTE? {
         guard data.count == 8 else {
             return nil
         }
         let port = UInt16(data[2] ^ MagicCookie[0]) * 256 + UInt16(data[3] ^ MagicCookie[1])
-        return XOR_MAPPED_ADDRESS_ATTRIBUTE_PACKET(family: data[1],
+        return XOR_MAPPED_ADDRESS_ATTRIBUTE(family: data[1],
                                                    port: port,
                                                    addr1: data[4] ^ MagicCookie[0],
                                                    addr2: data[5] ^ MagicCookie[1],
@@ -179,54 +185,25 @@ struct XOR_MAPPED_ADDRESS_ATTRIBUTE_PACKET: Packet {
     }
 }
 
-struct ERROR_CODE_ATTRIBUTE_PACKET: Packet {
-    let errorCode: STUNServerError
+extension XOR_MAPPED_ADDRESS_ATTRIBUTE: GeneralAddressAttribute {
+    var address: String {
+        return "\(self.addr1).\(self.addr2).\(self.addr3).\(self.addr4)"
+    }
+}
+
+struct ERROR_CODE_ATTRIBUTE: Attribute {
+    let errorCode: StunServerError
     let description: String
     
-    static func getFromData(_ data: Data) -> ERROR_CODE_ATTRIBUTE_PACKET? {
+    static func fromData(_ data: Data) -> ERROR_CODE_ATTRIBUTE? {
         guard data.count > 4 else {
             return nil
         }
-        return ERROR_CODE_ATTRIBUTE_PACKET(errorCode: STUNServerError(rawValue: UInt16(data[2]) * 100 + UInt16(data[3]))!,
+        return ERROR_CODE_ATTRIBUTE(errorCode: StunServerError(rawValue: UInt16(data[2]) * 100 + UInt16(data[3]))!,
                                            description: String(data: data.subdata(in: Range(uncheckedBounds: (lower: 4, upper: data.count - 1))), encoding: .utf8)!)
     }
     
     func getDescription() -> String {
         return "ErrorCode: \(errorCode), description: \(description)"
-    }
-}
-
-struct STUNAttribute {
-    let attributeType: [UInt8]
-    let attributeLength: [UInt8]
-    let attributeBody: [UInt8]
-    
-    static func getAttribute(from data: [UInt8]) throws -> STUNAttribute {
-        return STUNAttribute(attributeType: [UInt8](data[0..<2]),
-                             attributeLength:  [UInt8](data[2..<4]),
-                             attributeBody: [UInt8](data[4..<4 + Int(data[2]) * 256 + Int(data[3])]))
-    }
-    
-    static func formAttribute(type: AttributeType, body:[UInt8]) -> STUNAttribute {
-        return STUNAttribute(attributeType: [UInt8(type.rawValue / 256), UInt8(type.rawValue % 256)],
-                             attributeLength: [UInt8(body.count / 256), UInt8(body.count % 256)],
-                             attributeBody: body
-        )
-    }
-    
-    func getAttributeLength() -> Int {
-        return attributeType.count + attributeLength.count + attributeBody.count
-    }
-    
-    func getAttributeType() -> AttributeType {
-        return AttributeType(rawValue: Int(self.attributeType[0]) * 256 + Int(self.attributeType[1])) ?? .UNKNOWN
-    }
-    
-    func toArray() -> [UInt8] {
-        return self.attributeType + self.attributeLength + self.attributeBody
-    }
-    
-    func description() throws -> String {
-        return try "\(getAttributeType()) \n \(getAttributeType().getPacket(from: Data(self.attributeBody)).description)"
     }
 }
