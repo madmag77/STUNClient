@@ -62,7 +62,7 @@ open class StunClient {
         }
     }()
     
-    private var stunHandler: StunTransportNioImpl?
+    private var stunHandler: StunInboundHandler?
     
     required public init(stunIpAddress: String, stunPort: UInt16, localPort: UInt16 = 0) {
         self.stunIpAddress = stunIpAddress
@@ -138,7 +138,7 @@ open class StunClient {
     private func startWhoAmI() {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
-            self.stunHandler = StunTransportNioImpl(errorHandler: self.errorCallback,
+            self.stunHandler = StunInboundHandler(errorHandler: self.errorCallback,
                                                     attributesHandler: self.attributesHandler)
             do {
                 try self.startStunBindingProcedure().whenSuccess({ channel in

@@ -10,7 +10,7 @@ import Foundation
 import NIO
 
 /// Decode byte buffer to Stun packet
-private final class StunCodec: ByteToMessageDecoder {
+final class StunCodec: ByteToMessageDecoder {
     public typealias InboundIn = ByteBuffer
     public typealias InboundOut = StunPacket
         
@@ -26,7 +26,7 @@ private final class StunCodec: ByteToMessageDecoder {
 }
 
 /// Convert AddressEnvelope to Byte buffer  for ByteToMessageDecoder
-private final class EnvelopToByteBufferConverter: ChannelInboundHandler {
+final class EnvelopToByteBufferConverter: ChannelInboundHandler {
     public typealias InboundIn = AddressedEnvelope<ByteBuffer>
     public typealias InboundOut = ByteBuffer
     
@@ -43,7 +43,7 @@ private final class EnvelopToByteBufferConverter: ChannelInboundHandler {
 }
 
 /// Handle reading attributes and errors
-private final class StunTransportNioImpl: ChannelInboundHandler {
+final class StunInboundHandler: ChannelInboundHandler {
     public typealias InboundIn = StunPacket
     public typealias OutboundOut = AddressedEnvelope<ByteBuffer>
     public typealias ErrorHandler = ((StunError) -> ())?
