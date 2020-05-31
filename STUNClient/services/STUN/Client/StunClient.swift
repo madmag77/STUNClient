@@ -5,7 +5,7 @@ public enum NatType {
     case noNat
     case blocked
     case fullCone
-    case dymmetric
+    case symmetric
     case portRestricted
     case coneRestricted
 }
