@@ -1,4 +1,5 @@
 import UIKit
+import StunClient
 
 class ViewController: UIViewController {
     @IBOutlet weak var stunLog: UITextView!
@@ -15,13 +16,13 @@ class ViewController: UIViewController {
     }
     
     override func viewDidAppear(_ animated: Bool) {
+        self.stunLog.text = ""
         let localPort = 14135
-        stunLog.text = "Run stun procedure from local address \(localPort)"
         client = StunClient(stunIpAddress: "64.233.163.127", stunPort: 19302, localPort: UInt16(localPort))
         let successCallback: (String, Int) -> () = { [weak self] (myAddress: String, myPort: Int) in
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                self.stunLog.text = self.stunLog.text + "\n" + "COMPLETED, my address: " + myAddress + " my port: " + String(myPort)
+                self.stunLog.text = self.stunLog.text + "\n\n" + "COMPLETED, my address: " + myAddress + " my port: " + String(myPort)
             }
         }
         let errorCallback: (StunError) -> () = { [weak self] error in
