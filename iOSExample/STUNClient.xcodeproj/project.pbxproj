@@ -1,0 +1,615 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 52;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E75517FEFF22E8E2E08323E7 /* Pods_STUNClientTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3F24A7ABDC1FD48DEAE1699 /* Pods_STUNClientTests.framework */; };
+		EB010C8E24876E18004D81D0 /* StunClient in Frameworks */ = {isa = PBXBuildFile; productRef = EB010C8D24876E18004D81D0 /* StunClient */; };
+		EB72F9A01E7E7943000FF742 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB72F99F1E7E7943000FF742 /* AppDelegate.swift */; };
+		EB72F9A21E7E7943000FF742 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB72F9A11E7E7943000FF742 /* ViewController.swift */; };
+		EB72F9A51E7E7943000FF742 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EB72F9A31E7E7943000FF742 /* Main.storyboard */; };
+		EB72F9A71E7E7943000FF742 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EB72F9A61E7E7943000FF742 /* Assets.xcassets */; };
+		EB72F9AA1E7E7943000FF742 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EB72F9A81E7E7943000FF742 /* LaunchScreen.storyboard */; };
+		EB72F9B51E7E7943000FF742 /* STUNClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB72F9B41E7E7943000FF742 /* STUNClientTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EB72F9B11E7E7943000FF742 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EB72F9941E7E7943000FF742 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EB72F99B1E7E7943000FF742;
+			remoteInfo = STUNClient;
+		};
+		EB72F9BC1E7E7943000FF742 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EB72F9941E7E7943000FF742 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EB72F99B1E7E7943000FF742;
+			remoteInfo = STUNClient;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		2371611BFBDD6586F37481B6 /* Pods_STUNClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STUNClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A3F24A7ABDC1FD48DEAE1699 /* Pods_STUNClientTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STUNClientTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB72F99C1E7E7943000FF742 /* STUNClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = STUNClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB72F99F1E7E7943000FF742 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		EB72F9A11E7E7943000FF742 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		EB72F9A41E7E7943000FF742 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		EB72F9A61E7E7943000FF742 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EB72F9A91E7E7943000FF742 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		EB72F9AB1E7E7943000FF742 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EB72F9B01E7E7943000FF742 /* STUNClientTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = STUNClientTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB72F9B41E7E7943000FF742 /* STUNClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STUNClientTests.swift; sourceTree = "<group>"; };
+		EB72F9B61E7E7943000FF742 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EB72F9BB1E7E7943000FF742 /* STUNClientUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = STUNClientUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EB72F9991E7E7943000FF742 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB010C8E24876E18004D81D0 /* StunClient in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB72F9AD1E7E7943000FF742 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E75517FEFF22E8E2E08323E7 /* Pods_STUNClientTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB72F9B81E7E7943000FF742 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		67EBD5A47CB387567E0B5405 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2371611BFBDD6586F37481B6 /* Pods_STUNClient.framework */,
+				A3F24A7ABDC1FD48DEAE1699 /* Pods_STUNClientTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		EB72F9931E7E7943000FF742 = {
+			isa = PBXGroup;
+			children = (
+				EB72F99E1E7E7943000FF742 /* STUNClient */,
+				EB72F9B31E7E7943000FF742 /* STUNClientTests */,
+				EB72F99D1E7E7943000FF742 /* Products */,
+				67EBD5A47CB387567E0B5405 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		EB72F99D1E7E7943000FF742 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EB72F99C1E7E7943000FF742 /* STUNClient.app */,
+				EB72F9B01E7E7943000FF742 /* STUNClientTests.xctest */,
+				EB72F9BB1E7E7943000FF742 /* STUNClientUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EB72F99E1E7E7943000FF742 /* STUNClient */ = {
+			isa = PBXGroup;
+			children = (
+				EB72F99F1E7E7943000FF742 /* AppDelegate.swift */,
+				EB72F9A11E7E7943000FF742 /* ViewController.swift */,
+				EB72F9A31E7E7943000FF742 /* Main.storyboard */,
+				EB72F9A61E7E7943000FF742 /* Assets.xcassets */,
+				EB72F9A81E7E7943000FF742 /* LaunchScreen.storyboard */,
+				EB72F9AB1E7E7943000FF742 /* Info.plist */,
+			);
+			path = STUNClient;
+			sourceTree = "<group>";
+		};
+		EB72F9B31E7E7943000FF742 /* STUNClientTests */ = {
+			isa = PBXGroup;
+			children = (
+				EB72F9B41E7E7943000FF742 /* STUNClientTests.swift */,
+				EB72F9B61E7E7943000FF742 /* Info.plist */,
+			);
+			path = STUNClientTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EB72F99B1E7E7943000FF742 /* STUNClient */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB72F9C41E7E7943000FF742 /* Build configuration list for PBXNativeTarget "STUNClient" */;
+			buildPhases = (
+				EB72F9981E7E7943000FF742 /* Sources */,
+				EB72F9991E7E7943000FF742 /* Frameworks */,
+				EB72F99A1E7E7943000FF742 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = STUNClient;
+			packageProductDependencies = (
+				EB010C8D24876E18004D81D0 /* StunClient */,
+			);
+			productName = STUNClient;
+			productReference = EB72F99C1E7E7943000FF742 /* STUNClient.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EB72F9AF1E7E7943000FF742 /* STUNClientTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB72F9C71E7E7943000FF742 /* Build configuration list for PBXNativeTarget "STUNClientTests" */;
+			buildPhases = (
+				BB4FDD6AFAE1B8A2D16951F1 /* [CP] Check Pods Manifest.lock */,
+				EB72F9AC1E7E7943000FF742 /* Sources */,
+				EB72F9AD1E7E7943000FF742 /* Frameworks */,
+				EB72F9AE1E7E7943000FF742 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EB72F9B21E7E7943000FF742 /* PBXTargetDependency */,
+			);
+			name = STUNClientTests;
+			productName = STUNClientTests;
+			productReference = EB72F9B01E7E7943000FF742 /* STUNClientTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		EB72F9BA1E7E7943000FF742 /* STUNClientUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB72F9CA1E7E7943000FF742 /* Build configuration list for PBXNativeTarget "STUNClientUITests" */;
+			buildPhases = (
+				EB72F9B71E7E7943000FF742 /* Sources */,
+				EB72F9B81E7E7943000FF742 /* Frameworks */,
+				EB72F9B91E7E7943000FF742 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EB72F9BD1E7E7943000FF742 /* PBXTargetDependency */,
+			);
+			name = STUNClientUITests;
+			productName = STUNClientUITests;
+			productReference = EB72F9BB1E7E7943000FF742 /* STUNClientUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EB72F9941E7E7943000FF742 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0820;
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = MadMag;
+				TargetAttributes = {
+					EB72F99B1E7E7943000FF742 = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = STZB53GU8R;
+						ProvisioningStyle = Automatic;
+					};
+					EB72F9AF1E7E7943000FF742 = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = STZB53GU8R;
+						ProvisioningStyle = Automatic;
+						TestTargetID = EB72F99B1E7E7943000FF742;
+					};
+					EB72F9BA1E7E7943000FF742 = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = STZB53GU8R;
+						ProvisioningStyle = Automatic;
+						TestTargetID = EB72F99B1E7E7943000FF742;
+					};
+				};
+			};
+			buildConfigurationList = EB72F9971E7E7943000FF742 /* Build configuration list for PBXProject "STUNClient" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				en,
+				Base,
+			);
+			mainGroup = EB72F9931E7E7943000FF742;
+			packageReferences = (
+				EB010C8C24876E18004D81D0 /* XCRemoteSwiftPackageReference "STUNClient" */,
+			);
+			productRefGroup = EB72F99D1E7E7943000FF742 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EB72F99B1E7E7943000FF742 /* STUNClient */,
+				EB72F9AF1E7E7943000FF742 /* STUNClientTests */,
+				EB72F9BA1E7E7943000FF742 /* STUNClientUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EB72F99A1E7E7943000FF742 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB72F9AA1E7E7943000FF742 /* LaunchScreen.storyboard in Resources */,
+				EB72F9A71E7E7943000FF742 /* Assets.xcassets in Resources */,
+				EB72F9A51E7E7943000FF742 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB72F9AE1E7E7943000FF742 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB72F9B91E7E7943000FF742 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		BB4FDD6AFAE1B8A2D16951F1 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-STUNClientTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EB72F9981E7E7943000FF742 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB72F9A21E7E7943000FF742 /* ViewController.swift in Sources */,
+				EB72F9A01E7E7943000FF742 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB72F9AC1E7E7943000FF742 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB72F9B51E7E7943000FF742 /* STUNClientTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB72F9B71E7E7943000FF742 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EB72F9B21E7E7943000FF742 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EB72F99B1E7E7943000FF742 /* STUNClient */;
+			targetProxy = EB72F9B11E7E7943000FF742 /* PBXContainerItemProxy */;
+		};
+		EB72F9BD1E7E7943000FF742 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EB72F99B1E7E7943000FF742 /* STUNClient */;
+			targetProxy = EB72F9BC1E7E7943000FF742 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		EB72F9A31E7E7943000FF742 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				EB72F9A41E7E7943000FF742 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		EB72F9A81E7E7943000FF742 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				EB72F9A91E7E7943000FF742 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		EB72F9C21E7E7943000FF742 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		EB72F9C31E7E7943000FF742 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		EB72F9C51E7E7943000FF742 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = STZB53GU8R;
+				INFOPLIST_FILE = STUNClient/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.MadMag.STUNClient;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		EB72F9C61E7E7943000FF742 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = STZB53GU8R;
+				INFOPLIST_FILE = STUNClient/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.MadMag.STUNClient;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		EB72F9C81E7E7943000FF742 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = STZB53GU8R;
+				INFOPLIST_FILE = STUNClientTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.-MadMag.STUNClientTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/STUNClient.app/STUNClient";
+			};
+			name = Debug;
+		};
+		EB72F9C91E7E7943000FF742 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = STZB53GU8R;
+				INFOPLIST_FILE = STUNClientTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.-MadMag.STUNClientTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/STUNClient.app/STUNClient";
+			};
+			name = Release;
+		};
+		EB72F9CB1E7E7943000FF742 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				DEVELOPMENT_TEAM = STZB53GU8R;
+				INFOPLIST_FILE = STUNClientUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.-MadMag.STUNClientUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = STUNClient;
+			};
+			name = Debug;
+		};
+		EB72F9CC1E7E7943000FF742 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				DEVELOPMENT_TEAM = STZB53GU8R;
+				INFOPLIST_FILE = STUNClientUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.-MadMag.STUNClientUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = STUNClient;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EB72F9971E7E7943000FF742 /* Build configuration list for PBXProject "STUNClient" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB72F9C21E7E7943000FF742 /* Debug */,
+				EB72F9C31E7E7943000FF742 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EB72F9C41E7E7943000FF742 /* Build configuration list for PBXNativeTarget "STUNClient" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB72F9C51E7E7943000FF742 /* Debug */,
+				EB72F9C61E7E7943000FF742 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EB72F9C71E7E7943000FF742 /* Build configuration list for PBXNativeTarget "STUNClientTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB72F9C81E7E7943000FF742 /* Debug */,
+				EB72F9C91E7E7943000FF742 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EB72F9CA1E7E7943000FF742 /* Build configuration list for PBXNativeTarget "STUNClientUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB72F9CB1E7E7943000FF742 /* Debug */,
+				EB72F9CC1E7E7943000FF742 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EB010C8C24876E18004D81D0 /* XCRemoteSwiftPackageReference "STUNClient" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/madmag77/STUNClient";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EB010C8D24876E18004D81D0 /* StunClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EB010C8C24876E18004D81D0 /* XCRemoteSwiftPackageReference "STUNClient" */;
+			productName = StunClient;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = EB72F9941E7E7943000FF742 /* Project object */;
+}
