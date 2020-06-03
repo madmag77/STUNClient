@@ -1,11 +1,3 @@
-//
-//  AppDelegate.swift
-//  STUNClient
-//
-//  Created by Artem Goncharov on 19/03/2017.
-//  Copyright © 2017 MadMag. All rights reserved.
-//
-
 import UIKit
 
 @UIApplicationMain

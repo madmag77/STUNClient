@@ -98,6 +98,10 @@ struct STRING_ATTRIBUTE: Attribute {
     var description: String {
         return content
     }
+    
+    func toArray() -> [UInt8] {
+        return [UInt8](content.data(using: .utf8) ?? Data())
+    }
 }
 
 struct NORMAL_ADDRESS_ATTRIBUTE: Attribute {

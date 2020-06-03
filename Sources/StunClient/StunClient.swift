@@ -137,6 +137,7 @@ open class StunClient {
     }
     
     private func startWhoAmI() {
+        verboseCallback?("Start Who Am I procedure with Stun server \(stunIpAddress):\(stunPort) from local port \(localPort)")
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
 

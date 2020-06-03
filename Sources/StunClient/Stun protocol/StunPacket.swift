@@ -40,8 +40,13 @@ struct StunPacket {
     
     static func makeBindingRequest(responseFromAddress: String = "", port: UInt16 = 0) -> StunPacket  {
         
-        let body: [UInt8] = responseFromAddress == "" ? []: getChangeRequestAttribute() + getResponseAddressAttribute(responseFromAddress: responseFromAddress, port: port)
+        let body: [UInt8] = responseFromAddress == ""
+            ? []
+            : getChangeRequestAttribute() + getResponseAddressAttribute(responseFromAddress: responseFromAddress, port: port)
         
+//        let attr = STRING_ATTRIBUTE.getFromString("version")
+//        let body: [UInt8] = StunAttribute.formAttribute(type: .SOFTWARE, body: attr.toArray()).toArray()
+//        print(body)
         return StunPacket(msgRequestType: [0x00, 0x01],
                                 bodyLength:  [UInt8(body.count / 256), UInt8(body.count % 256)],
                                 magicCookie: MagicCookie,

@@ -1,22 +1,12 @@
-//
-//  ViewController.swift
-//  STUNClient
-//
-//  Created by Artem Goncharov on 19/03/2017.
-//  Copyright © 2017 MadMag. All rights reserved.
-//
-
 import UIKit
 
 class ViewController: UIViewController {
     @IBOutlet weak var stunLog: UITextView!
-    //lazy var stunClient: STUNClient = STUNClient(delegate: self)
     var secondTime: Bool = false
     var client: StunClient!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
     }
 
     override func didReceiveMemoryWarning() {
@@ -25,17 +15,6 @@ class ViewController: UIViewController {
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        stunLog.text = "-----==FIRST TIME==-----\n"
-//        do {
-//            try self.stunClient.getNATParams(stunAddress: "64.233.163.127", localPort: 14135, stunPort: 19302)
-//        } catch STUNError.CantBindToLocalPort(let port) {
-//            self.error(errorText: "Cant Bind To Local Port \(port)")
-//        } catch STUNError.CantRunUdpSocket {
-//            self.error(errorText: "Cant Run UDP Socket")
-//        } catch {
-//            self.error(errorText: "Unexpeted error \(error)")
-//        }
-        //stun.l.google.com
         let localPort = 14135
         stunLog.text = "Run stun procedure from local address \(localPort)"
         client = StunClient(stunIpAddress: "64.233.163.127", stunPort: 19302, localPort: UInt16(localPort))
