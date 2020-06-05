@@ -38,32 +38,13 @@ struct StunPacket {
         return Data(msgRequestType + bodyLength + magicCookie + transactionIdBindingRequest + body)
     }
     
-    static func makeBindingRequest(responseFromAddress: String = "", port: UInt16 = 0) -> StunPacket  {
-        
-        let body: [UInt8] = responseFromAddress == ""
-            ? []
-            : getChangeRequestAttribute() + getResponseAddressAttribute(responseFromAddress: responseFromAddress, port: port)
-        
-//        let attr = STRING_ATTRIBUTE.getFromString("version")
-//        let body: [UInt8] = StunAttribute.formAttribute(type: .SOFTWARE, body: attr.toArray()).toArray()
-//        print(body)
+    static func makeBindingRequest() -> StunPacket  {
         return StunPacket(msgRequestType: [0x00, 0x01],
-                                bodyLength:  [UInt8(body.count / 256), UInt8(body.count % 256)],
+                                bodyLength:  [0x00, 0x00],
                                 magicCookie: MagicCookie,
                                 transactionIdBindingRequest: RandomTransactionID.getTransactionID(),
-                                body: body
+                                body: []
         )
-    }
-    
-    static func getChangeRequestAttribute() ->  [UInt8] {
-        let attributeChangeRequest: [UInt8] = [0x00, 0x00, 0x00, 0x02]
-        return StunAttribute.formAttribute(type: .CHANGE_REQUEST,
-                                    body: attributeChangeRequest).toArray()
-    }
-
-    static func getResponseAddressAttribute(responseFromAddress: String, port: UInt16) ->  [UInt8] {
-        return StunAttribute.formAttribute(type: .RESPONSE_ADDRESS,
-                                           body: NORMAL_ADDRESS_ATTRIBUTE.formAttribute(with: responseFromAddress, and: port).toData()).toArray()
     }
     
     static func parse(from data: Data) -> StunPacket? {

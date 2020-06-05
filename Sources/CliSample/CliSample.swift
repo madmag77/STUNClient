@@ -21,7 +21,7 @@ public final class CliSample {
         let errorCallback: (StunError) -> () = { [weak self] error in
                     guard let self = self else { return }
                     
-                    print("ERROR: \(error.localizedDescription)")
+                    print("ERROR: \(error.errorDescription)")
                     self.semaphore.signal()
             }
         let verboseCallback: (String) -> () = { [weak self] logText in
