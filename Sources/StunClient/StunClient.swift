@@ -24,6 +24,14 @@ public enum StunError: Error {
     case cantResolveStunServerAddress
     case stunServerError(StunServerError)
     case cantRead(String)
+    
+    public var errorDescription: String {
+        switch self {
+        case .cantConvertValue, .cantPreparePacket, .cantResolveStunServerAddress: return "\(self)"
+        case .cantRunUdpSocket(let lowLevelError), .cantRead(let lowLevelError): return "\(self), \(lowLevelError)"
+        case .stunServerError(let lowLevelError): return "\(self), \(lowLevelError)"
+        }
+    }
 }
 
 fileprivate enum StunState {
@@ -138,24 +146,22 @@ open class StunClient {
     
     private func startWhoAmI() {
         verboseCallback?("Start Who Am I procedure with Stun server \(stunIpAddress):\(stunPort) from local port \(localPort)")
-        DispatchQueue.global().async { [weak self] in
-            guard let self = self else { return }
-
-            do {
-                try self.startStunBindingProcedure().whenSuccess({ channel in
+       
+        let _ = startStunBindingProcedure().always({ result in
+                switch result {
+                case .success(let channel):
                     self.stunHandler.sendBindingRequest(channel: channel, toStunServerAddress: self.stunIpAddress, toStunServerPort: Int(self.stunPort))
-                    })
-            } catch {
-                self.errorCallback?(.cantRunUdpSocket((error as? NIO.IOError)?.description ?? error.localizedDescription))
-            }
-        }
+                case .failure(let error):
+                    self.errorCallback?(.cantRunUdpSocket((error as? NIO.IOError)?.description ?? error.localizedDescription))
+                }
+            })
     }
     
     private func startNatTypeDiscovery() {
-        
+        // TODO
     }
     
-    private func startStunBindingProcedure() throws -> EventLoopFuture<Channel>  {
+    private func startStunBindingProcedure() -> EventLoopFuture<Channel>  {
         return self.bootstrap.bind(host: "0.0.0.0", port: Int(self.localPort))
     }
 }
