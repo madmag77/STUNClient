@@ -3,5 +3,6 @@ import XCTest
 import StunClientTests
 
 var tests = [XCTestCaseEntry]()
-tests += StunClientTests.allTests()
+tests += StunClientTests.__allTests()
+
 XCTMain(tests)

@@ -200,11 +200,11 @@ struct ERROR_CODE_ATTRIBUTE: Attribute {
     let description: String
     
     static func fromData(_ data: Data) -> ERROR_CODE_ATTRIBUTE? {
-        guard data.count > 4 else {
+        guard data.count >= 4 else {
             return nil
         }
-        return ERROR_CODE_ATTRIBUTE(errorCode: StunServerError(rawValue: UInt16(data[2]) * 100 + UInt16(data[3]))!,
-                                           description: String(data: data.subdata(in: Range(uncheckedBounds: (lower: 4, upper: data.count - 1))), encoding: .utf8)!)
+        return ERROR_CODE_ATTRIBUTE(errorCode: StunServerError(rawValue: UInt16(data[2]) * 100 + UInt16(data[3])) ?? .unknown,
+                                           description: String(data: data.subdata(in: Range(uncheckedBounds: (lower: 4, upper: data.count))), encoding: .utf8) ?? "")
     }
     
     func getDescription() -> String {
