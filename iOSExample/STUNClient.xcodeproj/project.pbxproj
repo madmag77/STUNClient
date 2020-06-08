@@ -598,7 +598,7 @@
 			repositoryURL = "https://github.com/madmag77/STUNClient";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.8.0;
+				minimumVersion = 1.0.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
