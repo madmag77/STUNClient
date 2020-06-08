@@ -1,3 +1,5 @@
+![Swift](https://github.com/madmag77/STUNClient/workflows/Swift/badge.svg?branch=master)
+
 # StunClient
 
 Simple Stun client that connects to Stun server using UDP and asks for your external IP and Port. Can be used both from iOS and macOS.
