@@ -17,19 +17,21 @@ public struct NatParams {
     public var description: String { return "External IP: \(myExternalIP) \n External Port: \(myExternalPort) \n NAT Type: \(natType) \n" }
 }
 
-public enum StunError: Error {
+public enum StunError: Error, Equatable {
     case cantConvertValue
     case cantPreparePacket
     case cantRunUdpSocket(String)
     case cantResolveStunServerAddress
     case stunServerError(StunServerError)
     case cantRead(String)
+    case wrongResponse
+    case readTimeout
     
     public var errorDescription: String {
         switch self {
-        case .cantConvertValue, .cantPreparePacket, .cantResolveStunServerAddress: return "\(self)"
         case .cantRunUdpSocket(let lowLevelError), .cantRead(let lowLevelError): return "\(self), \(lowLevelError)"
         case .stunServerError(let lowLevelError): return "\(self), \(lowLevelError)"
+        default: return "\(self)"
         }
     }
 }
@@ -49,6 +51,7 @@ open class StunClient {
     private let stunIpAddress: String
     private let stunPort: UInt16
     private let localPort: UInt16
+    private let timeoutInMilliseconds: Int64
     private var successCallback: ((String, Int) -> ())?
     private var natTypeCallback: ((NatParams) -> ())?
     private var errorCallback: ((StunError) -> ())?
@@ -60,23 +63,23 @@ open class StunClient {
         DatagramBootstrap(group: group)
         .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
         .channelInitializer { channel in
-            channel.pipeline.addHandler(EnvelopToByteBufferConverter(errorHandler: self.errorCallback))
-                .flatMap {
-                    channel.pipeline.addHandler(ByteToMessageHandler(StunCodec()))
-                }
-                .flatMap {
-                    channel.pipeline.addHandler(self.stunHandler)
-                }
+            channel.pipeline.addHandlers([
+                 EnvelopToByteBufferConverter(errorHandler: self.errorCallback),
+                 ByteToMessageHandler(StunCodec()),
+                 IdleStateHandler(readTimeout: TimeAmount.milliseconds(self.timeoutInMilliseconds)),
+                 self.stunHandler
+            ])
         }
     }()
     
     private lazy var stunHandler = { StunInboundHandler(errorHandler: self.errorCallback,
                                                           attributesHandler: self.attributesHandler) }()
     
-    required public init(stunIpAddress: String, stunPort: UInt16, localPort: UInt16 = 0) {
+    required public init(stunIpAddress: String, stunPort: UInt16, localPort: UInt16 = 0, timeoutInMilliseconds: Int64 = 100) {
         self.stunIpAddress = stunIpAddress
         self.stunPort = stunPort
         self.localPort = localPort == 0 ? UInt16.random(in: 10000..<55000) : localPort
+        self.timeoutInMilliseconds = timeoutInMilliseconds
     }
     
     deinit {
@@ -130,9 +133,20 @@ open class StunClient {
         }
     }
     
-    private func attributesHandler(_ attributes: [StunAttribute]) {
-        attributes.forEach { attribute in
-            verboseCallback?(attribute.description)
+    private func attributesHandler(_ attributes: [StunAttribute], responseWithError: Bool) {
+        if let verboseCallback = verboseCallback {
+            attributes.forEach { attribute in
+                verboseCallback(attribute.description)
+            }
+        }
+        
+        if responseWithError {
+            if let attribute = attributes.filter({ $0.attributeType == AttributeType.ERROR_CODE}).first,
+                let errorPacket = attribute.attributeType.getAttribute(from: Data((attribute.attributeBodyData))) as? ERROR_CODE_ATTRIBUTE {
+                errorCallback?(StunError.stunServerError(errorPacket.errorCode))
+                return
+            }
+            errorCallback?(StunError.stunServerError(.unknown))
         }
         
         guard let attribute = attributes.filter({ $0.attributeType.getAttribute(from: Data(($0.attributeBodyData))) is GeneralAddressAttribute}).first,

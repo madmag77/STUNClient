@@ -56,15 +56,17 @@ final class StunInboundHandler: ChannelInboundHandler {
     public typealias ErrorHandler = ((StunError) -> ())?
     
     private let errorHandler: ErrorHandler
-    private let attributesHandler:  ([StunAttribute]) -> ()
-   
-    init(errorHandler: ErrorHandler, attributesHandler: @escaping ([StunAttribute]) -> ()) {
+    private let attributesHandler:  ([StunAttribute], Bool) -> ()
+    private var sentPacket: StunPacket?
+    
+    init(errorHandler: ErrorHandler, attributesHandler: @escaping ([StunAttribute], Bool) -> ()) {
         self.errorHandler = errorHandler
         self.attributesHandler = attributesHandler
     }
     
     public func sendBindingRequest(channel: Channel, toStunServerAddress address: String, toStunServerPort port: Int) {
-        let requestData = StunPacket.makeBindingRequest().toData()
+        sentPacket = StunPacket.makeBindingRequest()
+        let requestData = sentPacket!.toData()
         
         let remoteAddress: SocketAddress
         do {
@@ -84,12 +86,24 @@ final class StunInboundHandler: ChannelInboundHandler {
     
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let packet = self.unwrapInboundIn(data)
+       
+        guard let sentPacket = sentPacket, sentPacket.isCorrectResponse(packet) else {
+            errorHandler?(.wrongResponse)
+            return
+        }
         
-        attributesHandler(packet.attributes())
+        attributesHandler(packet.attributes(), packet.isError())
     }
     
     public func errorCaught(context: ChannelHandlerContext, error: Error) {
         errorHandler?(.cantRead(error.localizedDescription))
+        context.close(promise: nil)
+    }
+    
+    public func userInboundEventTriggered(context: ChannelHandlerContext, event: Any) {
+        guard event is IdleStateHandler.IdleStateEvent else { return }
+        
+        errorHandler?(.readTimeout)
         context.close(promise: nil)
     }
 }

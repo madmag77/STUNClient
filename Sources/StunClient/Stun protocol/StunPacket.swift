@@ -15,11 +15,11 @@ struct RandomTransactionID {
 
 struct StunPacket {
     public static let stunHeaderLength: UInt16 = 20
-    private let msgRequestType: [UInt8] //2 bytes
-    private let bodyLength: [UInt8] //2 bytes
-    private let magicCookie: [UInt8] //4 bytes
-    private let transactionIdBindingRequest: [UInt8] //12 bytes
-    private let body: [UInt8] //attributes
+    let msgRequestType: [UInt8] //2 bytes
+    let bodyLength: [UInt8] //2 bytes
+    let magicCookie: [UInt8] //4 bytes
+    let transactionIdBindingRequest: [UInt8] //12 bytes
+    let body: [UInt8] //attributes
     
     init(msgRequestType: [UInt8],
          bodyLength: [UInt8],
@@ -72,6 +72,25 @@ struct StunPacket {
         } while (body.count >= 4)
         
         return attributes
+    }
+    
+    func isCorrectResponse(_ response: StunPacket) -> Bool {
+        guard let requestType = StunMessageType.fromData(Data(msgRequestType)),
+            let responseType = StunMessageType.fromData(Data(response.msgRequestType)),
+            requestType.isCorrectResponse(responseType),
+            magicCookie == MagicCookie,
+            transactionIdBindingRequest == response.transactionIdBindingRequest else {
+                return false
+        }
+               
+        return true
+    }
+    
+    func isError() -> Bool {
+        if let responseType = StunMessageType.fromData(Data(msgRequestType)),
+            responseType.isErrorType() { return true }
+        
+        return false
     }
 }
 

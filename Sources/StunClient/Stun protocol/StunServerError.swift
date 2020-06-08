@@ -1,6 +1,7 @@
 import Foundation
 
 public enum StunServerError: UInt16 {
+    case unknown = 0
     case badRequest = 400
     case unauthorized = 401
     case unknownAttribute = 420
