@@ -3,15 +3,9 @@ import StunClient
 
 public final class CliSample {
     private let arguments: [String]
-    private var client: StunClient!
     private let semaphore = DispatchSemaphore(value: 0)
     
-    public init(arguments: [String] = CommandLine.arguments) {
-        self.arguments = arguments
-    }
-
-    public func run() {
-        client = StunClient(stunIpAddress: "64.233.163.127", stunPort: 19302, localPort: UInt16(14135))
+    private lazy var client: StunClient = {
         let successCallback: (String, Int) -> () = { [weak self] (myAddress: String, myPort: Int) in
                 guard let self = self else { return }
                 
@@ -30,12 +24,19 @@ public final class CliSample {
                     print("LOG: \(logText)")
             }
         
-        client
+        return StunClient(stunIpAddress: "64.233.163.127", stunPort: 19302, localPort: UInt16(14135))
             .whoAmI()
             .ifWhoAmISuccessful(successCallback)
             .ifError(errorCallback)
             .verbose(verboseCallback)
-            .start()
+    } ()
+    
+    public init(arguments: [String] = CommandLine.arguments) {
+        self.arguments = arguments
+    }
+
+    public func run() {
+        client.start()
         
         _ = semaphore.wait(timeout: .distantFuture)
     }

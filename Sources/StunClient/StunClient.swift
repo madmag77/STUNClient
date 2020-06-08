@@ -58,32 +58,42 @@ open class StunClient {
     private var verboseCallback: ((String) -> ())?
     private var mode: ClientMode = .whoAmI
     
-    private lazy var group = { MultiThreadedEventLoopGroup(numberOfThreads: 1) }()
-    private lazy var bootstrap = {
-        DatagramBootstrap(group: group)
+    private var group: MultiThreadedEventLoopGroup?
+    private var bootstrap: DatagramBootstrap?
+    
+    private lazy var stunHandler = { StunInboundHandler(errorHandler: self.errorHandler,
+                                                             attributesHandler: self.attributesHandler) }()
+
+    private func initBootstrap() {
+        group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        
+        bootstrap = DatagramBootstrap(group: group!)
         .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
         .channelInitializer { channel in
             channel.pipeline.addHandlers([
-                 EnvelopToByteBufferConverter(errorHandler: self.errorCallback),
+                 EnvelopToByteBufferConverter(errorHandler: self.errorHandler),
                  ByteToMessageHandler(StunCodec()),
                  IdleStateHandler(readTimeout: TimeAmount.milliseconds(self.timeoutInMilliseconds)),
                  self.stunHandler
             ])
         }
-    }()
+    }
     
-    private lazy var stunHandler = { StunInboundHandler(errorHandler: self.errorCallback,
-                                                          attributesHandler: self.attributesHandler) }()
+    private func closeBootstrap() {
+        DispatchQueue.global().async {
+            try! self.group?.syncShutdownGracefully()
+        }
+    }
+    
+    private func closeBootstrapSync() {
+        try! self.group?.syncShutdownGracefully()
+    }
     
     required public init(stunIpAddress: String, stunPort: UInt16, localPort: UInt16 = 0, timeoutInMilliseconds: Int64 = 100) {
         self.stunIpAddress = stunIpAddress
         self.stunPort = stunPort
         self.localPort = localPort == 0 ? UInt16.random(in: 10000..<55000) : localPort
         self.timeoutInMilliseconds = timeoutInMilliseconds
-    }
-    
-    deinit {
-         try! group.syncShutdownGracefully()
     }
     
     public func whoAmI() -> StunClient {
@@ -133,7 +143,19 @@ open class StunClient {
         }
     }
     
+    private func errorHandler(_ error: StunError) {
+        defer {
+            closeBootstrap()
+        }
+        
+        errorCallback?(error)
+    }
+    
     private func attributesHandler(_ attributes: [StunAttribute], responseWithError: Bool) {
+        defer {
+            closeBootstrap()
+        }
+        
         if let verboseCallback = verboseCallback {
             attributes.forEach { attribute in
                 verboseCallback(attribute.description)
@@ -160,8 +182,12 @@ open class StunClient {
     
     private func startWhoAmI() {
         verboseCallback?("Start Who Am I procedure with Stun server \(stunIpAddress):\(stunPort) from local port \(localPort)")
-       
-        let _ = startStunBindingProcedure().always({ result in
+        
+        closeBootstrapSync()
+        
+        initBootstrap()
+        
+        let _ = startStunBindingProcedure()!.always({ result in
                 switch result {
                 case .success(let channel):
                     self.stunHandler.sendBindingRequest(channel: channel, toStunServerAddress: self.stunIpAddress, toStunServerPort: Int(self.stunPort))
@@ -175,7 +201,7 @@ open class StunClient {
         // TODO
     }
     
-    private func startStunBindingProcedure() -> EventLoopFuture<Channel>  {
-        return self.bootstrap.bind(host: "0.0.0.0", port: Int(self.localPort))
+    private func startStunBindingProcedure() -> EventLoopFuture<Channel>?  {
+        return self.bootstrap?.bind(host: "0.0.0.0", port: Int(self.localPort))
     }
 }
