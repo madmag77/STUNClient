@@ -18,7 +18,7 @@ Just add Stun Client to the `dependencies` of your `Package.swift`
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/madmag77/STUNClient.git", .upToNextMajor(from: "0.8.0"))
+    .package(url: "https://github.com/madmag77/STUNClient.git", .upToNextMajor(from: "1.0.0"))
 ]
 ```
 
@@ -63,13 +63,11 @@ let successCallback: (String, Int) -> () = { [weak self] (myAddress: String, myP
         guard let self = self else { return }
         
         print("COMPLETED, my address: \(myAddress) my port: \(myPort)")
-        self.semaphore.signal()
 }
 let errorCallback: (StunError) -> () = { [weak self] error in
             guard let self = self else { return }
             
             print("ERROR: \(error.localizedDescription)")
-            self.semaphore.signal()
     }
 let verboseCallback: (String) -> () = { [weak self] logText in
             guard let _ = self else { return }
