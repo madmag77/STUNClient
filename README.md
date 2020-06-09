@@ -27,6 +27,17 @@ dependencies: [
 or using Xcode Menu: File->Swift Packages->Add Package Dependency where just insert `https://github.com/madmag77/STUNClient.git` in the search line.
 
 
+### CocoaPods
+
+[CocoaPods](https://cocoapods.org) is a dependency manager for Cocoa projects. Add StunClient in the `Podfile`:
+
+```ruby
+pod 'StunClient'
+```
+
+iOS Example project with StunClient as a CocoaPod you can find here: https://github.com/madmag77/STUNClient/tree/master/iOSExampleWithPods
+
+
 ### Manually
 
 In terminal:
