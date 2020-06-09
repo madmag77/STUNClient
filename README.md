@@ -6,7 +6,7 @@ Simple Stun client that connects to Stun server using UDP and asks for your exte
 
 ## Requirements
 
-- iOS 9.0+ / macOS 10.12+
+- iOS 10.0+ / macOS 10.12+
 - Xcode 11+
 - Swift 5.2+
 
