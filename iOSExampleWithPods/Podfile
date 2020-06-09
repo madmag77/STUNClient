@@ -1,0 +1,11 @@
+source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '10.0'
+use_frameworks!
+
+target 'STUNClient' do
+	pod 'StunClient', :path => '../'
+end
+
+target 'STUNClientTests' do
+	pod 'StunClient', :path => '../'
+end
