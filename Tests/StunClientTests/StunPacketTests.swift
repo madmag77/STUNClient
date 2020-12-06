@@ -63,7 +63,7 @@ final class StunPacketTests: XCTestCase {
         
         let attribute = packet.attributes()[0]
         
-        guard let addressPacket = attribute.attributeType.getAttribute(from: Data((attribute.attributeBodyData))) as? GeneralAddressAttribute else {
+        guard let addressPacket = attribute.attributeType.getAttribute(from: Data((attribute.attributeBodyData)), transactionId: [], magicCookie: []) as? GeneralAddressAttribute else {
             XCTAssert(false, "Attribute from the packet should be parsed correctly")
             return
         }

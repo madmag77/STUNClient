@@ -23,8 +23,8 @@ public final class CliSample {
                     
                     print("LOG: \(logText)")
             }
-        
-        return StunClient(stunIpAddress: "64.233.163.127", stunPort: 19302, localPort: UInt16(14135))
+
+        return StunClient(stunIpAddress: "stun.l.google.com", stunPort: 19302, localPort: UInt16(14135))
             .whoAmI()
             .ifWhoAmISuccessful(successCallback)
             .ifError(errorCallback)

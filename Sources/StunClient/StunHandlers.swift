@@ -56,18 +56,15 @@ final class StunInboundHandler: ChannelInboundHandler {
     public typealias ErrorHandler = ((StunError) -> ())?
     
     private let errorHandler: ErrorHandler
-    private let attributesHandler:  ([StunAttribute], Bool) -> ()
+    private let attributesHandler:  ([StunAttribute], Bool, [UInt8]) -> ()
     private var sentPacket: StunPacket?
     
-    init(errorHandler: ErrorHandler, attributesHandler: @escaping ([StunAttribute], Bool) -> ()) {
+    init(errorHandler: ErrorHandler, attributesHandler: @escaping ([StunAttribute], Bool, [UInt8]) -> ()) {
         self.errorHandler = errorHandler
         self.attributesHandler = attributesHandler
     }
     
     public func sendBindingRequest(channel: Channel, toStunServerAddress address: String, toStunServerPort port: Int) {
-        sentPacket = StunPacket.makeBindingRequest()
-        let requestData = sentPacket!.toData()
-        
         let remoteAddress: SocketAddress
         do {
             remoteAddress = try SocketAddress.makeAddressResolvingHost(address, port: port)
@@ -75,7 +72,11 @@ final class StunInboundHandler: ChannelInboundHandler {
             errorHandler?(.cantResolveStunServerAddress)
             return
         }
-        
+
+        let protocolFamily = remoteAddress.protocol == .inet ? ProtocolFamily.ipv4 : ProtocolFamily.ipv6
+        sentPacket = StunPacket.makeBindingRequest(with: protocolFamily)
+        let requestData = sentPacket!.toData()
+ 
         var buffer = channel.allocator.buffer(capacity: requestData.count)
         buffer.writeBytes(requestData)
 
@@ -92,7 +93,7 @@ final class StunInboundHandler: ChannelInboundHandler {
             return
         }
         
-        attributesHandler(packet.attributes(), packet.isError())
+        attributesHandler(packet.attributes(), packet.isError(), sentPacket.transactionIdBindingRequest)
     }
     
     public func errorCaught(context: ChannelHandlerContext, error: Error) {
