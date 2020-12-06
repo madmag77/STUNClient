@@ -44,7 +44,6 @@ struct StunPacket {
                                 magicCookie: MagicCookie,
                                 transactionIdBindingRequest: RandomTransactionID.getTransactionID(),
                                 body: REQUESTED_ADDRESS_FAMILY(protocolFamily: family).toData()
-                                //body: [0x00, 0x17, 0x00, 0x04, 0x00, 0x00, 0x00, 0x02]
         )
     }
     
@@ -54,10 +53,10 @@ struct StunPacket {
         }
         
         return StunPacket(msgRequestType: [UInt8](data[0..<2]),
-                                bodyLength:  [UInt8](data[2..<4]),
-                                magicCookie: [UInt8](data[4..<8]),
-                                transactionIdBindingRequest: [UInt8](data[8..<20]),
-                                body: [UInt8](data[20..<data.count]))
+                          bodyLength:  [UInt8](data[2..<4]),
+                          magicCookie: [UInt8](data[4..<8]),
+                          transactionIdBindingRequest: [UInt8](data[8..<20]),
+                          body: [UInt8](data[20..<data.count]))
     }
     
     func attributes() ->  [StunAttribute] {
