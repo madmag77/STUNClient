@@ -63,7 +63,9 @@ final class StunPacketTests: XCTestCase {
         
         let attribute = packet.attributes()[0]
         
-        guard let addressPacket = attribute.attributeType.getAttribute(from: Data((attribute.attributeBodyData))) as? GeneralAddressAttribute else {
+        guard let addressPacket = attribute.attributeType.getAttribute(from: Data((attribute.attributeBodyData)),
+                                                                       transactionId: Array(bindingResponse[8..<20]),
+                                                                       magicCookie: Array(bindingResponse[4..<8])) as? GeneralAddressAttribute else {
             XCTAssert(false, "Attribute from the packet should be parsed correctly")
             return
         }
@@ -73,6 +75,31 @@ final class StunPacketTests: XCTestCase {
         XCTAssertEqual(addressPacket.port, expectedPort)
     }
     
+    func testParseAttributesFromCorrectIpv6Data() {
+        // Given
+        let expectedIpv6Address = "88a9:a8b9:dfef:ce05:3bd3:27c5:3bff:8565"
+        let expectedPort: UInt16 = 37332
+
+        // When
+        guard let packet = StunPacket.parse(from: bindingResponseIpv6) else {
+            XCTAssert(false, "Packet should be parsed correctly")
+            return
+        }
+        
+        let attribute = packet.attributes()[0]
+        
+        guard let addressPacket = attribute.attributeType.getAttribute(from: Data((attribute.attributeBodyData)),
+                                                                       transactionId: Array(bindingResponse[8..<20]),
+                                                                       magicCookie: Array(bindingResponse[4..<8])) as? GeneralAddressAttribute else {
+            XCTAssert(false, "Attribute from the packet should be parsed correctly")
+            return
+        }
+        
+        // Then
+        XCTAssertEqual(addressPacket.address, expectedIpv6Address)
+        XCTAssertEqual(addressPacket.port, expectedPort)
+    }
+
     func testIfResponseIsCorrectSuccess() {
         // Given
         let requestPacket = StunPacket.parse(from: bindingRequest)!

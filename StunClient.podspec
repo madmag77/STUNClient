@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'StunClient'
-  s.version = '1.0.3'
+  s.version = '1.0.4'
   s.license = 'MIT'
   s.summary = 'My IP address and port discovery'
   s.homepage = 'https://github.com/madmag77/StunClient'

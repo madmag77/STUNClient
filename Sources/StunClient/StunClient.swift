@@ -62,7 +62,7 @@ open class StunClient {
     private var bootstrap: DatagramBootstrap?
     
     private lazy var stunHandler = { StunInboundHandler(errorHandler: self.errorHandler,
-                                                             attributesHandler: self.attributesHandler) }()
+                                                        attributesHandler: self.attributesHandler) }()
 
     private func initBootstrap() {
         group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
@@ -151,28 +151,36 @@ open class StunClient {
         errorCallback?(error)
     }
     
-    private func attributesHandler(_ attributes: [StunAttribute], responseWithError: Bool) {
+    private func attributesHandler(_ attributes: [StunAttribute],
+                                   responseWithError: Bool,
+                                   transactionId: [UInt8]) {
         defer {
             closeBootstrap()
         }
         
         if let verboseCallback = verboseCallback {
             attributes.forEach { attribute in
-                verboseCallback(attribute.description)
+                verboseCallback(attribute.getDescription(with: transactionId))
             }
         }
         
         if responseWithError {
             if let attribute = attributes.filter({ $0.attributeType == AttributeType.ERROR_CODE}).first,
-                let errorPacket = attribute.attributeType.getAttribute(from: Data((attribute.attributeBodyData))) as? ERROR_CODE_ATTRIBUTE {
+               let errorPacket = attribute.attributeType.getAttribute(from: Data((attribute.attributeBodyData)),
+                                                                      transactionId: transactionId,
+                                                                      magicCookie: MagicCookie) as? ERROR_CODE_ATTRIBUTE {
                 errorCallback?(StunError.stunServerError(errorPacket.errorCode))
                 return
             }
             errorCallback?(StunError.stunServerError(.unknown))
         }
         
-        guard let attribute = attributes.filter({ $0.attributeType.getAttribute(from: Data(($0.attributeBodyData))) is GeneralAddressAttribute}).first,
-            let addressPacket = attribute.attributeType.getAttribute(from: Data((attribute.attributeBodyData))) as? GeneralAddressAttribute else {
+        guard let attribute = attributes.filter({ $0.attributeType.getAttribute(from: Data(($0.attributeBodyData)),
+                                                                                transactionId: transactionId,
+                                                                                magicCookie: MagicCookie) is GeneralAddressAttribute}).first,
+              let addressPacket = attribute.attributeType.getAttribute(from: Data((attribute.attributeBodyData)),
+                                                                       transactionId: transactionId,
+                                                                       magicCookie: MagicCookie) as? GeneralAddressAttribute else {
                 errorCallback?(StunError.cantConvertValue)
                 return
         }
@@ -190,7 +198,9 @@ open class StunClient {
         let _ = startStunBindingProcedure()!.always({ result in
                 switch result {
                 case .success(let channel):
-                    self.stunHandler.sendBindingRequest(channel: channel, toStunServerAddress: self.stunIpAddress, toStunServerPort: Int(self.stunPort))
+                    self.stunHandler.sendBindingRequest(channel: channel,
+                                                        toStunServerAddress: self.stunIpAddress,
+                                                        toStunServerPort: Int(self.stunPort))
                 case .failure(let error):
                     self.errorCallback?(.cantRunUdpSocket((error as? NIO.IOError)?.description ?? error.localizedDescription))
                 }
@@ -202,6 +212,20 @@ open class StunClient {
     }
     
     private func startStunBindingProcedure() -> EventLoopFuture<Channel>?  {
-        return self.bootstrap?.bind(host: "0.0.0.0", port: Int(self.localPort))
+        let ipv4LocalAddress = "0.0.0.0"
+        let ipv6LocalAddress = "::"
+        
+        let remoteAddress: SocketAddress
+        do {
+            remoteAddress = try SocketAddress.makeAddressResolvingHost(stunIpAddress,
+                                                                       port: Int(stunPort))
+        } catch {
+            return self.bootstrap?.bind(host: ipv4LocalAddress,
+                                        port: Int(self.localPort))
+        }
+
+        let localAddress = remoteAddress.protocol == .inet ? ipv4LocalAddress : ipv6LocalAddress
+        return self.bootstrap?.bind(host: localAddress,
+                                    port: Int(self.localPort))
     }
 }
