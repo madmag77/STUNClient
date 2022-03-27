@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'StunClient'
-  s.version = '1.0.4'
+  s.version = '1.0.5'
   s.license = 'MIT'
   s.summary = 'My IP address and port discovery'
   s.homepage = 'https://github.com/madmag77/StunClient'
@@ -15,5 +15,5 @@ Pod::Spec.new do |s|
 
   s.source_files = 'Sources/StunClient/**/*.swift'
 
-  s.dependency 'SwiftNIO', '~> 2.18.0'
+  s.dependency 'SwiftNIO', '~> 2.38'
 end
