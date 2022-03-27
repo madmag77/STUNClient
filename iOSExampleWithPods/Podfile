@@ -3,9 +3,9 @@ platform :ios, '10.0'
 use_frameworks!
 
 target 'STUNClient' do
-	pod 'StunClient'
+	pod 'StunClient', :path => '..'
 end
 
 target 'STUNClientTests' do
-	pod 'StunClient'
+	pod 'StunClient', :path => '..'
 end
